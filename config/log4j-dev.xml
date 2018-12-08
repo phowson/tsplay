@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="debug" strict="true" name="KaggleSanta"
+	packages="">
+	<Properties>
+		<Property name="log4jlogfilename">logs/santa.log</Property>
+	</Properties>
+	<Appenders>
+
+		<!-- <Appender type="Console" name="STDOUT"> <Filters> <Filter type="ThresholdFilter" 
+			level="INFO" onMatch="ACCEPT" onMismatch="DENY" /> </Filters> <Layout type="PatternLayout" 
+			pattern="%d [%-6p] %t – %m - %C{1}.%M(%F:%L)%n" /> </Appender> -->
+
+		<RollingFile name="File" fileName="${log4jlogfilename}"
+			filePattern="${log4jlogfilename}.%d{yyyy-MM-dd}.log.gz"
+			ignoreExceptions="false">
+			<Filters>
+				<Filter type="ThresholdFilter" level="INFO" onMatch="ACCEPT"
+					onMismatch="DENY" />
+			</Filters>
+			<PatternLayout>
+				<Pattern>%d [%-6p] %t – %m - %C{1}.%M(%F:%L)%n</Pattern>
+			</PatternLayout>
+			<TimeBasedTriggeringPolicy />
+		</RollingFile>
+
+
+
+	</Appenders>
+
+	<Loggers>
+
+		<AsyncLogger name='' level="info" includeLocation="true">
+			<AppenderRef ref="STDOUT" />
+			<AppenderRef ref="File" />
+		</AsyncLogger>
+
+
+	</Loggers>
+
+</Configuration>
