@@ -46,13 +46,16 @@ public class GATest implements Runnable {
 	private final int sectionWidth = 50;
 	private final int fixInterval = 2;
 	private final int retries = 1;
+	private int unFixedGenerations = 50;
+	private int maxDupRuns = 200;
+	
+	
 	private GAStats gaStats;
 	private int startIdx;
 	private int endIdx;
 	private BestPathSoFar bpsf;
 	private SplittableRandom sr = new SplittableRandom();
 	private boolean overallConvergence;
-	private int unFixedGenerations = 200;
 
 	public GATest(WorldMap map, BestPathSoFar bpsf2, GAStats gaStats, int startIdx, int endIdx) {
 		this.map = map;
@@ -125,34 +128,36 @@ public class GATest implements Runnable {
 		double lastBest = 0;
 		int duplicateRuns = 0;
 		boolean canFix = false;
-
+		int fixes = 0;
 		while (true) {
 
 			if (g == unFixedGenerations) {
 				canFix = true;
-				duplicateRuns = 0;
 			}
 
-			ga.runOneGeneration(canFix && g % fixInterval == 0);
+			boolean f = canFix && g % fixInterval == 0;
+			ga.runOneGeneration(f);
+			if (f) {
+				++fixes;
+			}
 
 			double best = ga.getBestSoFar();
-			if (lastBest == best) {
+
+			if (lastBest == best && canFix) {
 				++duplicateRuns;
 			} else {
 				duplicateRuns = 0;
 			}
 			lastBest = best;
 
-			if (duplicateRuns == 200) {
-
+			if (duplicateRuns == maxDupRuns) {
 				break;
-
 			}
 			++g;
 		}
 
 		double best = ga.getBestSoFar();
-		gaStats.updateStats(best <= absoluteBest.getLength() + 1e-5, g);
+		gaStats.updateStats(best <= absoluteBest.getLength() + 1e-5, g, fixes);
 		overallConvergence |= best <= absoluteBest.getLength() + 1e-5;
 
 		if (best < absoluteBest.getLength()) {

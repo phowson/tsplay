@@ -13,12 +13,14 @@ public class GAStats {
 
 	public double overallRuns;
 	public double overallConvergence;
+	public double fixes;
 
-	public synchronized void updateStats(boolean b, int g) {
+	public synchronized void updateStats(boolean b, int g, int fixes) {
 		if (b) {
 			++convergence;
 		}
 		++runs;
+		this.fixes += fixes;
 		generations += g;
 
 	}
@@ -27,7 +29,9 @@ public class GAStats {
 		System.out.println("--------------");
 		System.out.println("Convergence rate : " + (convergence / runs));
 		System.out.println("Average generations : " + (generations / runs));
+		System.out.println("Fixes per run : " + (fixes/ runs));
 		System.out.println("Overall convergence rate : " + (overallConvergence / overallRuns));
+		System.out.println("Total runs : " + (overallRuns));
 	}
 
 	public synchronized void overallStats(boolean b) {
