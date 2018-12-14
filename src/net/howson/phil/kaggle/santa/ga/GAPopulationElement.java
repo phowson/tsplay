@@ -13,6 +13,8 @@ public class GAPopulationElement implements Comparable<GAPopulationElement> {
 	final int[] items;
 	private double length;
 
+	public boolean fixed;
+
 	public GAPopulationElement(GAEnvironment env, int[] items) {
 		super();
 		this.env = env;
@@ -21,6 +23,7 @@ public class GAPopulationElement implements Comparable<GAPopulationElement> {
 
 	public void resetLength() {
 		length = 0;
+		fixed = false;
 	}
 
 	public double getLength() {

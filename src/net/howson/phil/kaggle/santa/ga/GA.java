@@ -49,7 +49,9 @@ public class GA {
 	public void fix() {
 		final int l = population.length;
 		for (int i = 0; i < l; ++i) {
-			fixOperator.fix(population[i]);
+			if (!population[i].fixed) {
+				fixOperator.fix(population[i]);
+			}
 		}
 		Arrays.sort(population);
 	}

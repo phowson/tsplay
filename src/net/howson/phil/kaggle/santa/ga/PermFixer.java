@@ -51,7 +51,7 @@ public class PermFixer implements FixOperator {
 		} while (origdist != dist);
 
 		e.resetLength();
-
+		e.fixed = true;
 	}
 
 }

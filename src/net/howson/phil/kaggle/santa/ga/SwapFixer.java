@@ -30,7 +30,8 @@ public class SwapFixer implements FixOperator {
 
 		} while (origdist != dist);
 
-		e.resetLength();
+		e.resetLength();		
+		e.fixed = true;
 
 	}
 
