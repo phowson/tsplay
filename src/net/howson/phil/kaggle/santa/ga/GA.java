@@ -55,6 +55,14 @@ public class GA {
 		}
 		Arrays.sort(population);
 	}
+	
+	public void applyOneOffFix(FixOperator fixer) {
+		final int l = population.length;
+		for (int i = 0; i < l; ++i) {
+			fixer.fix(population[i]);
+		}
+		Arrays.sort(population);
+	}
 
 	public void setup(GAPopulationElement seed) {
 

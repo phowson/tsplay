@@ -9,12 +9,37 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import net.howson.phil.kaggle.santa.BestPathSoFar;
+import net.howson.phil.kaggle.santa.ga.GATest.LoggingRunnable;
 import net.howson.phil.kaggle.santa.map.MapLoader;
 import net.howson.phil.kaggle.santa.map.WorldMap;
 import net.howson.phil.kaggle.santa.path.Path;
 import net.howson.phil.kaggle.santa.path.PathLoader;
 
 public class GATest implements Runnable {
+
+	public static class LoggingRunnable implements Runnable {
+
+		private BestPathSoFar bpsf;
+		private GAStats gaStats;
+
+		public LoggingRunnable(BestPathSoFar bpsf, GAStats gaStats) {
+			this.bpsf = bpsf;
+			this.gaStats = gaStats;
+		}
+
+		@Override
+		public void run() {
+			try {
+				while (!Thread.interrupted()) {
+					Thread.sleep(10000);
+					gaStats.print();
+					System.out.println("Current best : " + bpsf.get().length);
+				}
+			} catch (InterruptedException e) {
+
+			}
+		}
+	}
 
 	private static final Logger logger = LogManager.getLogger(GATest.class);
 	private WorldMap map;
@@ -24,6 +49,9 @@ public class GATest implements Runnable {
 	private GAStats gaStats;
 	private int startIdx;
 	private int endIdx;
+	private BestPathSoFar bpsf;
+	private SplittableRandom sr = new SplittableRandom();
+	private boolean overallConvergence;
 
 	public GATest(WorldMap map, BestPathSoFar bpsf2, GAStats gaStats, int startIdx, int endIdx) {
 		this.map = map;
@@ -31,6 +59,7 @@ public class GATest implements Runnable {
 		this.gaStats = gaStats;
 		this.startIdx = startIdx;
 		this.endIdx = endIdx;
+
 	}
 
 	public static void main(String[] args) throws FileNotFoundException, IOException {
@@ -46,11 +75,9 @@ public class GATest implements Runnable {
 		for (int i = 0; i < 4; ++i)
 			new Thread(new GATest(map, bpsf, gaStats, 1 + (i * width), 1 + width + (i * width))).start();
 
-	}
+		new Thread(new LoggingRunnable(bpsf, gaStats)).start();
 
-	private BestPathSoFar bpsf;
-	private SplittableRandom sr = new SplittableRandom();
-	private boolean overallConvergence;
+	}
 
 	public void run() {
 
@@ -60,12 +87,12 @@ public class GATest implements Runnable {
 
 			Path b = bpsf.get();
 			int[] path = b.steps;
-			int i = sr.nextInt((endIdx-startIdx) - sectionWidth - 1) + startIdx;
+			int i = sr.nextInt((endIdx - startIdx) - sectionWidth - 1) + startIdx;
 
 			runGaAt(map, path, sectionWidth, pathSection, i);
 
 			bpsf.update(path, map.pathDistanceRoundTripToZero(path));
-			gaStats.print();
+
 		}
 
 	}
@@ -114,31 +141,9 @@ public class GATest implements Runnable {
 				duplicateRuns = 0;
 			}
 			lastBest = best;
-			// if (g % 2 == 0) {
-			// ga.fix();
-			//
 
-			/*
-			 * if (g % 50 == 0) { System.out.println("-- Generation : " + g);
-			 * System.out.println("Original length : " + orig.getLength());
-			 * System.out.println("Best : " + ga.getBestSoFar()); }
-			 */
+			if (duplicateRuns == 200) {
 
-			if (duplicateRuns == 300) {
-				// System.out.println("fix");
-				// double beforeFix = ga.getBestSoFar();
-				// ga.fix();
-				// if (ga.getBestSoFar() == beforeFix) {
-				// ++fixNoEffect;
-				//
-				// ga.insert(orig);
-				// }
-				//
-				// if (fixNoEffect == 2) {
-				// break;
-				// }
-				// System.out.println("Best : " + ga.getBestSoFar());
-				// duplicateRuns = 0;
 				break;
 
 			}
