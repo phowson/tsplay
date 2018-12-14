@@ -28,7 +28,8 @@ public class GAStats {
 
 	public synchronized void print() {
 		System.out.println("--------------");
-		System.out.println("Convergence rate : " + (convergence / runs));
+		double cr = (convergence / runs);
+		System.out.println("Convergence rate : " + cr);
 		System.out.println("Average generations : " + (generations / runs));
 		System.out.println("Fixes per run : " + (fixes/ runs));
 		System.out.println("Overall convergence rate : " + (overallConvergence / overallRuns));
@@ -37,7 +38,10 @@ public class GAStats {
 		long tds = System.currentTimeMillis() - startTime;
 		double td = tds / 60000.0; 
 		
-		System.out.println("Runs per minute : " + (overallRuns / td));
+		double rpm = (overallRuns / td);
+		System.out.println("Runs per minute : " + rpm);
+		System.out.println("Convergence per minute : " + (cr * rpm) );
+		
 	}
 
 	public synchronized void overallStats(boolean b) {
