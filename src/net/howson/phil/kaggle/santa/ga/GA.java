@@ -103,7 +103,8 @@ public class GA {
 
 		totalScore = 0;
 		for (int i = 0; i < population.length; ++i) {
-			totalScore += popScores[i] = 1.0 / (population[i].getLength() * population[i].getLength());
+			final double length = population[i].getLength();
+			totalScore += popScores[i] = 1.0 / (length * length);
 		}
 
 		for (int i = eliteSize; i < popSize; ++i) {
@@ -127,12 +128,14 @@ public class GA {
 
 		boolean hadDups = false;
 		// Eliminate duplicates from population
+		GAPopulationElement last = population[0];
 		for (int i = 1; i < popSize; ++i) {
-			GAPopulationElement last = population[i - 1];
 			GAPopulationElement c = population[i];
 			if (last.getLength() == c.getLength()) {
 				mutationOperator.mutate(c);
 				hadDups = true;
+			} else {
+				last = c;
 			}
 		}
 
