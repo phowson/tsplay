@@ -14,7 +14,18 @@ public class GAStats {
 	public double overallRuns;
 	public double overallConvergence;
 	public double fixes;
-	public final long startTime = System.currentTimeMillis();
+	public long startTime = System.currentTimeMillis();
+	
+	public synchronized void reset() {
+		convergence=0;
+		runs=0;
+		generations=0;
+
+		overallRuns=0;
+		overallConvergence=0;
+		fixes = 0;
+		startTime = System.currentTimeMillis();
+	}
 
 	public synchronized void updateStats(boolean b, int g, int fixes) {
 		if (b) {
