@@ -44,9 +44,9 @@ public class GATest implements Runnable {
 	private static final Logger logger = LogManager.getLogger(GATest.class);
 	private WorldMap map;
 	private final int sectionWidth = 50;
-	private final int fixInterval = 2;
+	private final int fixInterval = 3;
 	private final int retries = 1;
-	private int unFixedGenerations = 50;
+	private int unFixedGenerations = 10;
 	private int maxDupRuns = 200;
 	
 	
