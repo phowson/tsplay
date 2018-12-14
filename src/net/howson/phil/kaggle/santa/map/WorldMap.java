@@ -3,7 +3,7 @@ package net.howson.phil.kaggle.santa.map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class WorldMap {
+public final class WorldMap {
 
 	private static final Logger logger = LogManager.getLogger(WorldMap.class);
 
@@ -65,14 +65,6 @@ public class WorldMap {
 	}
 
 	public double distance(int a, int b, final int step) {
-		if (b < 0 || b >= cityX.length) {
-			b = 0;
-		}
-
-		if (a < 0 || a >= cityX.length) {
-			a = 0;
-		}
-
 		final double o = (cityX[a] - cityX[b]);
 		final double ad = (cityY[a] - cityY[b]);
 		final double d = Math.sqrt((o * o) + (ad * ad));

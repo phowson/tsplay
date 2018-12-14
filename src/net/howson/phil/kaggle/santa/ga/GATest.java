@@ -45,13 +45,14 @@ public class GATest implements Runnable {
 	private WorldMap map;
 	private final int sectionWidth = 50;
 	private final int fixInterval = 2;
-	private final int retries = 4;
+	private final int retries = 1;
 	private GAStats gaStats;
 	private int startIdx;
 	private int endIdx;
 	private BestPathSoFar bpsf;
 	private SplittableRandom sr = new SplittableRandom();
 	private boolean overallConvergence;
+	private int unFixedGenerations = 200;
 
 	public GATest(WorldMap map, BestPathSoFar bpsf2, GAStats gaStats, int startIdx, int endIdx) {
 		this.map = map;
@@ -127,7 +128,7 @@ public class GATest implements Runnable {
 
 		while (true) {
 
-			if (g == 200) {
+			if (g == unFixedGenerations) {
 				canFix = true;
 				duplicateRuns = 0;
 			}

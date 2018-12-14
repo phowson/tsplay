@@ -88,18 +88,6 @@ public class GA {
 	public void runOneGeneration(boolean fix) {
 		final int popSize = population.length;
 
-		// int eliteProportionInt = 25;
-		// int rePopTo = 25;
-		//
-		// for (int i = 0; i < rePopTo; ++i) {
-		// int a = sr.nextInt(eliteProportionInt);
-		// int b = sr.nextInt(eliteProportionInt - a) + a;
-		//
-		// population[sr.nextInt(popSize - eliteProportionInt) +
-		// eliteProportionInt] = crossoverOperator
-		// .crossOver(population[a], population[b]);
-		//
-		// }
 
 		totalScore = 0;
 		for (int i = 0; i < population.length; ++i) {
