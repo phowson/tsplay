@@ -109,13 +109,10 @@ public class GA {
 			mutationOperator.mutate(population[a]);
 		}
 
-		// for (int i = 1; i < popSize; ++i) {
-		// mo2.mutate(population[i]);
-		// }
-
-//		Arrays.sort(population);
 		if (fix) {
 			fix();
+		} else {
+			Arrays.sort(population);
 		}
 
 		boolean hadDups = false;
