@@ -30,6 +30,9 @@ public class GATest implements Runnable {
 		@Override
 		public void run() {
 			try {
+				Thread.sleep(60000);
+				gaStats.reset();
+
 				while (!Thread.interrupted()) {
 					Thread.sleep(10000);
 					gaStats.print();
@@ -44,12 +47,13 @@ public class GATest implements Runnable {
 	private static final Logger logger = LogManager.getLogger(GATest.class);
 	private WorldMap map;
 	private final int sectionWidth = 50;
-	private final int fixInterval = 3;
+	private final int fixInterval = 5;
 	private final int retries = 1;
 	private int unFixedGenerations = 10;
 	private int maxDupRuns = 200;
-	
-	
+	private double eliteProportion = 0.3;
+	private int populationSize = 125;
+
 	private GAStats gaStats;
 	private int startIdx;
 	private int endIdx;
@@ -107,7 +111,7 @@ public class GATest implements Runnable {
 				pathSection);
 
 		GAPopulationElement absoluteBest = new GAPopulationElement(gae, pathSection);
-		GA ga = new GA(0.25, 0.2, 100, gae, new BasicSafeCrossover2(), new BasicRandomisationMutation(sectionWidth / 4),
+		GA ga = new GA(0.25, eliteProportion, populationSize, gae, new BasicSafeCrossover2(), new BasicRandomisationMutation(sectionWidth / 4),
 				// new LocalRandomisationMutation(sectionWidth/4, 1),
 				// new BrokenPermFixer(5, gae)
 				new SwapFixer(gae));
