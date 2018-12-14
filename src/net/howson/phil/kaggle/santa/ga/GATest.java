@@ -18,15 +18,19 @@ public class GATest implements Runnable {
 
 	private static final Logger logger = LogManager.getLogger(GATest.class);
 	private WorldMap map;
-	private final int sectionWidth = 55;
+	private final int sectionWidth = 50;
 	private final int fixInterval = 2;
 	private final int retries = 4;
 	private GAStats gaStats;
+	private int startIdx;
+	private int endIdx;
 
-	public GATest(WorldMap map, BestPathSoFar bpsf2, GAStats gaStats) {
+	public GATest(WorldMap map, BestPathSoFar bpsf2, GAStats gaStats, int startIdx, int endIdx) {
 		this.map = map;
 		this.bpsf = bpsf2;
 		this.gaStats = gaStats;
+		this.startIdx = startIdx;
+		this.endIdx = endIdx;
 	}
 
 	public static void main(String[] args) throws FileNotFoundException, IOException {
@@ -34,11 +38,13 @@ public class GATest implements Runnable {
 		final WorldMap map = new MapLoader().load(new File("./data/cities.csv"));
 		final int[] path = new PathLoader().load(new File("./data/out.csv"));
 		double initialLength = map.pathDistanceRoundTripToZero(path);
-		System.out.println("Started at : "+ initialLength);
+		System.out.println("Started at : " + initialLength);
 		BestPathSoFar bpsf = new BestPathSoFar(new Path(path, initialLength));
 		GAStats gaStats = new GAStats();
+
+		int width = path.length / 4;
 		for (int i = 0; i < 4; ++i)
-			new Thread(new GATest(map, bpsf, gaStats)).start();
+			new Thread(new GATest(map, bpsf, gaStats, 1 + (i * width), 1 + width + (i * width))).start();
 
 	}
 
@@ -54,7 +60,7 @@ public class GATest implements Runnable {
 
 			Path b = bpsf.get();
 			int[] path = b.steps;
-			int i = sr.nextInt(path.length - sectionWidth - 1) + 1;
+			int i = sr.nextInt((endIdx-startIdx) - sectionWidth - 1) + startIdx;
 
 			runGaAt(map, path, sectionWidth, pathSection, i);
 
@@ -70,7 +76,7 @@ public class GATest implements Runnable {
 				pathSection);
 
 		GAPopulationElement absoluteBest = new GAPopulationElement(gae, pathSection);
-		GA ga = new GA(0.25, 100, gae, new BasicSafeCrossover2(), new BasicRandomisationMutation(sectionWidth / 4),
+		GA ga = new GA(0.25, 0.2, 100, gae, new BasicSafeCrossover2(), new BasicRandomisationMutation(sectionWidth / 4),
 				// new LocalRandomisationMutation(sectionWidth/4, 1),
 				// new BrokenPermFixer(5, gae)
 				new SwapFixer(gae));
@@ -91,15 +97,14 @@ public class GATest implements Runnable {
 		double lastBest = 0;
 		int duplicateRuns = 0;
 		boolean canFix = false;
-		
-		
+
 		while (true) {
 
-			if (g==200) {
+			if (g == 200) {
 				canFix = true;
 				duplicateRuns = 0;
 			}
-			
+
 			ga.runOneGeneration(canFix && g % fixInterval == 0);
 
 			double best = ga.getBestSoFar();

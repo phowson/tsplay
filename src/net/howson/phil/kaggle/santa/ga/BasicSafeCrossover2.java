@@ -12,11 +12,11 @@ public class BasicSafeCrossover2 implements CrossoverOperator {
 	private static final Logger logger = LogManager.getLogger(BasicSafeCrossover2.class);
 
 	private final SplittableRandom r = new SplittableRandom();
+	private final TIntHashSet workingSet = new TIntHashSet();
 
 	@Override
 	public GAPopulationElement crossOver(GAPopulationElement a, GAPopulationElement b) {
-		TIntHashSet workingSet = new TIntHashSet();
-
+		workingSet.clear();
 		final int n = a.items.length;
 		int[] out = new int[n];
 		int crossOverPoint = r.nextInt(a.items.length);

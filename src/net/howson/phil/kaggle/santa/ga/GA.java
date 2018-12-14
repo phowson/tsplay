@@ -25,12 +25,12 @@ public class GA {
 	private FixOperator fixOperator;
 
 	private double totalScore;
+	private int eliteSize;
 
-	private MutationOperator mo2 = new EveryGeneRandomisationMutation(0.015);
+	public GA(double mutationRate, double eliteRatio, int populationSize, GAEnvironment env,
+			CrossoverOperator crossoverOperator, MutationOperator mutationOperator, FixOperator fixOperator) {
 
-	public GA(double mutationRate, int populationSize, GAEnvironment env, CrossoverOperator crossoverOperator,
-			MutationOperator mutationOperator, FixOperator fixOperator) {
-
+		this.eliteSize = (int) Math.round(populationSize * eliteRatio);
 		mutationRateInt = (int) Math.round(populationSize * mutationRate);
 		population = new GAPopulationElement[populationSize];
 		newPopulation = new GAPopulationElement[populationSize];
@@ -96,16 +96,16 @@ public class GA {
 			totalScore += popScores[i] = 1.0 / (population[i].getLength() * population[i].getLength());
 		}
 
-		for (int i = 1; i < popSize; ++i) {
+		for (int i = eliteSize; i < popSize; ++i) {
 			int a = nextElement();
 			int b = nextElement();
 			newPopulation[i] = crossoverOperator.crossOver(population[a], population[b]);
 		}
 
-		System.arraycopy(newPopulation, 1, population, 1, popSize - 1);
+		System.arraycopy(newPopulation, eliteSize, population, eliteSize, popSize - eliteSize);
 
 		for (int i = 0; i < mutationRateInt; ++i) {
-			int a = sr.nextInt(popSize - 1) + 1;
+			int a = sr.nextInt(popSize - eliteSize) + eliteSize;
 			mutationOperator.mutate(population[a]);
 		}
 
