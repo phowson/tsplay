@@ -5,7 +5,6 @@ import java.util.SplittableRandom;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import gnu.trove.iterator.TIntIterator;
 import gnu.trove.set.hash.TIntHashSet;
 
 public class BasicSafeCrossover2 implements CrossoverOperator {

@@ -75,7 +75,7 @@ public class GA {
 
 	}
 
-	public void runOneGeneration() {
+	public void runOneGeneration(boolean fix) {
 		final int popSize = population.length;
 
 		// int eliteProportionInt = 25;
@@ -114,7 +114,9 @@ public class GA {
 		// }
 
 //		Arrays.sort(population);
-		fix();
+		if (fix) {
+			fix();
+		}
 
 		boolean hadDups = false;
 		// Eliminate duplicates from population

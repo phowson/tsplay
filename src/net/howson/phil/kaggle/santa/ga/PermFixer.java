@@ -4,7 +4,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import net.howson.phil.kaggle.santa.BruteForcePath;
-import net.howson.phil.kaggle.santa.path.PairSwapper;
 
 public class PermFixer implements FixOperator {
 
@@ -45,13 +44,9 @@ public class PermFixer implements FixOperator {
 		double origdist;
 		do {
 			origdist = dist;
-//			for (int i = 1; i < n; ++i) {
-//				dist = tryPermutationsAt(e.items, i, dist);
-//
-//			}
+			for (int i = 1; i < n; ++i) {
+				dist = tryPermutationsAt(e.items, i, dist);
 
-			for (int i = 1; i < n - 1; ++i) {
-				dist = trySwapsAt(e.items, i, dist);
 			}
 		} while (origdist != dist);
 
@@ -59,22 +54,4 @@ public class PermFixer implements FixOperator {
 
 	}
 
-	private double trySwapsAt(int[] items, int i, double dist) {
-		double bestlen = dist;
-		int best = i;
-		for (int j = i; j < items.length-1; ++j) {
-
-			final double l = PairSwapper.computeSwapDistance(items, dist, i, j, env.map, env.pathOffset-1);
-			if (l < bestlen) {
-				bestlen = l;
-				best = j;
-			}
-
-		}
-		if (bestlen < dist) {
-			PairSwapper.swap(items, best, i);
-		}
-		return bestlen;
-
-	}
 }

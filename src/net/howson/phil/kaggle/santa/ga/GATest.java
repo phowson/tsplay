@@ -18,115 +18,139 @@ public class GATest implements Runnable {
 
 	private static final Logger logger = LogManager.getLogger(GATest.class);
 	private WorldMap map;
-	int sectionWidth = 50;
-	public GATest(WorldMap map, BestPathSoFar bpsf2) {
+	private final int sectionWidth = 55;
+	private final int fixInterval = 2;
+	private final int retries = 4;
+	private GAStats gaStats;
+
+	public GATest(WorldMap map, BestPathSoFar bpsf2, GAStats gaStats) {
 		this.map = map;
 		this.bpsf = bpsf2;
+		this.gaStats = gaStats;
 	}
 
 	public static void main(String[] args) throws FileNotFoundException, IOException {
 
 		final WorldMap map = new MapLoader().load(new File("./data/cities.csv"));
-		// final int[] path = new PathLoader().load(new File("./data/out.csv"));
 		final int[] path = new PathLoader().load(new File("./data/out.csv"));
-		BestPathSoFar bpsf = new BestPathSoFar(new Path(path, map.pathDistanceRoundTripToZero(path)));
-		for (int i =0; i<4; ++i)
-			new Thread(new GATest(map, bpsf)).start();
-		
+		double initialLength = map.pathDistanceRoundTripToZero(path);
+		System.out.println("Started at : "+ initialLength);
+		BestPathSoFar bpsf = new BestPathSoFar(new Path(path, initialLength));
+		GAStats gaStats = new GAStats();
+		for (int i = 0; i < 4; ++i)
+			new Thread(new GATest(map, bpsf, gaStats)).start();
+
 	}
 
 	private BestPathSoFar bpsf;
 	private SplittableRandom sr = new SplittableRandom();
+	private boolean overallConvergence;
 
 	public void run() {
-
 
 		int[] pathSection = new int[sectionWidth];
 
 		while (true) {
 
-			int[] path = bpsf.get().steps;
+			Path b = bpsf.get();
+			int[] path = b.steps;
 			int i = sr.nextInt(path.length - sectionWidth - 1) + 1;
 
 			runGaAt(map, path, sectionWidth, pathSection, i);
+
 			bpsf.update(path, map.pathDistanceRoundTripToZero(path));
+			gaStats.print();
 		}
 
 	}
 
-	private void runGaAt(final WorldMap map, final int[] path, int sectionWidth, int[] pathSection, int i) {
-		System.arraycopy(path, i, pathSection, 0, sectionWidth);
-		GAEnvironment gae = new GAEnvironment(map, path[i - 1], path[i + sectionWidth], i + 1, pathSection);
+	private void runGaAt(final WorldMap map, final int[] path, int sectionWidth, int[] pathSection, int pathIndex) {
+		System.arraycopy(path, pathIndex, pathSection, 0, sectionWidth);
+		GAEnvironment gae = new GAEnvironment(map, path[pathIndex - 1], path[pathIndex + sectionWidth], pathIndex + 1,
+				pathSection);
 
-		GAPopulationElement orig = new GAPopulationElement(gae, pathSection);
 		GAPopulationElement absoluteBest = new GAPopulationElement(gae, pathSection);
-		absoluteBest.getLength();
 		GA ga = new GA(0.25, 100, gae, new BasicSafeCrossover2(), new BasicRandomisationMutation(sectionWidth / 4),
 				// new LocalRandomisationMutation(sectionWidth/4, 1),
 				// new BrokenPermFixer(5, gae)
-				new PermFixer(6, gae));
+				new SwapFixer(gae));
 
-		for (int t = 0; t < 4; ++t) {
-			ga.setup(null);
+		overallConvergence = false;
+		for (int t = 0; t < retries; ++t) {
+			absoluteBest = singleGaRun(path, sectionWidth, pathIndex, absoluteBest, ga);
+		}
+		gaStats.overallStats(overallConvergence);
 
-			int g = 1;
-			double lastBest = 0;
-			int duplicateRuns = 0;
-			int fixNoEffect = 0;
+	}
 
-			while (true) {
+	private GAPopulationElement singleGaRun(final int[] path, int sectionWidth, int pathIndex,
+			GAPopulationElement absoluteBest, GA ga) {
+		int g = 0;
+		ga.setup(null);
 
-				ga.runOneGeneration();
+		double lastBest = 0;
+		int duplicateRuns = 0;
+		boolean canFix = false;
+		
+		
+		while (true) {
 
-				double best = ga.getBestSoFar();
-				if (lastBest == best) {
-					++duplicateRuns;
-				} else {
-					fixNoEffect = 0;
-					duplicateRuns = 0;
-				}
-				lastBest = best;
-				// if (g % 2 == 0) {
-				// ga.fix();
-				//
-				
-				/*
-				if (g % 50 == 0) {
-					System.out.println("-- Generation : " + g);
-					System.out.println("Original length : " + orig.getLength());
-					System.out.println("Best : " + ga.getBestSoFar());
-				}*/
-
-				if (duplicateRuns == 300) {
-					// System.out.println("fix");
-					// double beforeFix = ga.getBestSoFar();
-					// ga.fix();
-					// if (ga.getBestSoFar() == beforeFix) {
-					// ++fixNoEffect;
-					//
-					// ga.insert(orig);
-					// }
-					//
-					// if (fixNoEffect == 2) {
-					// break;
-					// }
-					// System.out.println("Best : " + ga.getBestSoFar());
-					// duplicateRuns = 0;
-					break;
-
-				}
-				++g;
+			if (g==200) {
+				canFix = true;
+				duplicateRuns = 0;
 			}
+			
+			ga.runOneGeneration(canFix && g % fixInterval == 0);
 
 			double best = ga.getBestSoFar();
-			if (best < absoluteBest.getLength()) {
-				System.out.println("Improved! " + best);
-				absoluteBest = ga.getBestItem();
-				System.arraycopy(absoluteBest.items, 0, path, i, sectionWidth);
+			if (lastBest == best) {
+				++duplicateRuns;
+			} else {
+				duplicateRuns = 0;
+			}
+			lastBest = best;
+			// if (g % 2 == 0) {
+			// ga.fix();
+			//
+
+			/*
+			 * if (g % 50 == 0) { System.out.println("-- Generation : " + g);
+			 * System.out.println("Original length : " + orig.getLength());
+			 * System.out.println("Best : " + ga.getBestSoFar()); }
+			 */
+
+			if (duplicateRuns == 300) {
+				// System.out.println("fix");
+				// double beforeFix = ga.getBestSoFar();
+				// ga.fix();
+				// if (ga.getBestSoFar() == beforeFix) {
+				// ++fixNoEffect;
+				//
+				// ga.insert(orig);
+				// }
+				//
+				// if (fixNoEffect == 2) {
+				// break;
+				// }
+				// System.out.println("Best : " + ga.getBestSoFar());
+				// duplicateRuns = 0;
+				break;
 
 			}
+			++g;
 		}
 
+		double best = ga.getBestSoFar();
+		gaStats.updateStats(best <= absoluteBest.getLength() + 1e-5, g);
+		overallConvergence |= best <= absoluteBest.getLength() + 1e-5;
+
+		if (best < absoluteBest.getLength()) {
+			System.out.println("Improved! " + best + " at path position " + pathIndex);
+			absoluteBest = ga.getBestItem();
+			System.arraycopy(absoluteBest.items, 0, path, pathIndex, sectionWidth);
+
+		}
+		return absoluteBest;
 	}
 
 }

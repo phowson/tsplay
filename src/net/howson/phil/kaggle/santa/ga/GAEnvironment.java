@@ -4,7 +4,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import gnu.trove.set.hash.TIntHashSet;
-import net.howson.phil.kaggle.santa.FacArray;
 import net.howson.phil.kaggle.santa.map.WorldMap;
 
 public class GAEnvironment {
