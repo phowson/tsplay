@@ -11,16 +11,17 @@ public class EliteSelection implements CrossoverSelection {
 	private final SplittableRandom sr = new SplittableRandom();
 
 	private final double eliteProbability;
-	private int popSize;
+	private final int popSize;
 
-	public EliteSelection(double eliteProbability) {
+	public EliteSelection(double eliteProbability, int populationSize) {
 		super();
 		this.eliteProbability = eliteProbability;
+		this.popSize = populationSize;
 	}
 
 	@Override
 	public void init(GAPopulationElement[] population, int eliteSize) {
-		this.popSize = population.length;
+
 	}
 
 	@Override

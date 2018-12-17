@@ -51,6 +51,7 @@ public class GAStats {
 
 		final double rpm = (overallRuns / td);
 		System.out.println("Runs per minute : " + rpm);
+		System.out.println("Generations per minute : " + (generations / td));
 		System.out.println("Convergence per minute : " + (cr * rpm));
 
 	}

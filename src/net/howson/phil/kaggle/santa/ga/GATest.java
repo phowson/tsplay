@@ -29,7 +29,19 @@ public class GATest implements Runnable {
 		@Override
 		public void run() {
 			try {
-				Thread.sleep(5 * 60000);
+
+				Thread.sleep(1 * 60000);
+				gaStats.reset();
+				Thread.sleep(1 * 60000);
+
+				for (int i = 0; i < 10; ++i) {
+					System.out.println("Warming up");
+					gaStats.print();
+					gaStats.reset();
+					System.out.println("Current best : " + bpsf.get().length);
+					Thread.sleep(2 * 60000);
+				}
+
 				gaStats.reset();
 
 				while (!Thread.interrupted()) {
@@ -120,9 +132,8 @@ public class GATest implements Runnable {
 				new BasicRandomisationMutation((int) (sectionWidth)),
 
 				new SwapFixer(gae),
-				// new ProportionalSelection(populationSize, new
-				// InverseScorer())
-				new EliteSelection(0.5)
+				new ProportionalSelection(populationSize, new InverseScorer())
+//				new EliteSelection(0.5, populationSize)
 		// new NoSelection()
 
 		);

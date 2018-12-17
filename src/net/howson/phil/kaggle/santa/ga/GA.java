@@ -24,7 +24,6 @@ public final class GA {
 
 	private final FixOperator fixOperator;
 
-	private double totalScore;
 	private final int eliteSize;
 
 	private final MutationOperator twinMutationOperator;
