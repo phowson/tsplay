@@ -3,6 +3,7 @@ package net.howson.phil.kaggle.santa.ga;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import net.howson.phil.kaggle.santa.map.WorldMap;
 import net.howson.phil.kaggle.santa.path.PairSwapper;
 
 public final class SwapFixer implements FixOperator {
@@ -38,11 +39,15 @@ public final class SwapFixer implements FixOperator {
 		double bestlen = dist;
 		int best = i;
 
+		final int pathOffsetMinusOne = env.pathOffset - 1;
+		final int bi = env.beforeIdx;
+		final WorldMap map = env.map;
+		final int liMinusOne = items.length - 1;
+		final int afterIdx = env.afterIdx;
 		if (i == 0) {
 
-			for (int j = 1; j < items.length - 1; ++j) {
-				final double l = PairSwapper.computeSwapDistance0(env.beforeIdx, items, dist, i, j, env.map,
-						env.pathOffset - 1);
+			for (int j = 1; j < liMinusOne; ++j) {
+				final double l = PairSwapper.computeSwapDistance0(bi, items, dist, i, j, map, pathOffsetMinusOne);
 
 				if (l < bestlen) {
 					bestlen = l;
@@ -51,29 +56,17 @@ public final class SwapFixer implements FixOperator {
 
 			}
 
-			final double l = PairSwapper.computeSwapDistance0L(env.beforeIdx, env.afterIdx, items, dist, i,
-					items.length - 1, env.map, env.pathOffset - 1);
-
-			// PairSwapper.swap(items, 0, items.length-1);
-			// double d = env.map.pathDistanceFrom(env.beforeIdx,
-			// env.pathOffset, items);
-			// d += env.map.distance(items[items.length - 1], env.afterIdx,
-			// items.length + env.pathOffset);
-			//
-			// if (Math.abs(d-l)>1e-5) {
-			// System.out.println("??");
-			// }
-			// PairSwapper.swap(items, 0, items.length-1);
+			final double l = PairSwapper.computeSwapDistance0L(bi, afterIdx, items, dist, i, liMinusOne, map,
+					pathOffsetMinusOne);
 
 			if (l < bestlen) {
 				bestlen = l;
-				best = items.length - 1;
+				best = liMinusOne;
 			}
 
-		} else if (i == items.length - 1) {
-			for (int j = 1; j < items.length - 1; ++j) {
-				final double l = PairSwapper.computeSwapDistanceL(env.afterIdx, items, dist, i, j, env.map,
-						env.pathOffset - 1);
+		} else if (i == liMinusOne) {
+			for (int j = 1; j < liMinusOne; ++j) {
+				final double l = PairSwapper.computeSwapDistanceL(afterIdx, items, dist, i, j, map, pathOffsetMinusOne);
 
 				if (l < bestlen) {
 					bestlen = l;
@@ -84,9 +77,9 @@ public final class SwapFixer implements FixOperator {
 
 		} else {
 
-			for (int j = i; j < items.length - 1; ++j) {
+			for (int j = i; j < liMinusOne; ++j) {
 
-				final double l = PairSwapper.computeSwapDistance(items, dist, i, j, env.map, env.pathOffset - 1);
+				final double l = PairSwapper.computeSwapDistance(items, dist, i, j, map, pathOffsetMinusOne);
 
 				if (l < bestlen) {
 					bestlen = l;
