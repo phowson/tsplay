@@ -53,6 +53,8 @@ public class GATest implements Runnable {
 	private int maxDupRuns = 200;
 	private double eliteProportion = 0.3;
 	private int populationSize = 125;
+	private double mutationRate = 0.10;
+	private double mutationProportion = 0.15;
 
 	private GAStats gaStats;
 	private int startIdx;
@@ -111,10 +113,8 @@ public class GATest implements Runnable {
 				pathSection);
 
 		GAPopulationElement absoluteBest = new GAPopulationElement(gae, pathSection);
-		GA ga = new GA(0.25, eliteProportion, populationSize, gae, new BasicSafeCrossover2(), new BasicRandomisationMutation(sectionWidth / 4),
-				// new LocalRandomisationMutation(sectionWidth/4, 1),
-				// new BrokenPermFixer(5, gae)
-				new SwapFixer(gae));
+		GA ga = new GA(mutationRate, eliteProportion, populationSize, gae, new BasicSafeCrossover2(),
+				new BasicRandomisationMutation((int) (sectionWidth * mutationProportion)), new SwapFixer(gae));
 
 		overallConvergence = false;
 		for (int t = 0; t < retries; ++t) {
