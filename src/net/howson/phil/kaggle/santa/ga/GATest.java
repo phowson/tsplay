@@ -9,7 +9,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import net.howson.phil.kaggle.santa.BestPathSoFar;
-import net.howson.phil.kaggle.santa.ga.GATest.LoggingRunnable;
 import net.howson.phil.kaggle.santa.map.MapLoader;
 import net.howson.phil.kaggle.santa.map.WorldMap;
 import net.howson.phil.kaggle.santa.path.Path;
@@ -19,10 +18,10 @@ public class GATest implements Runnable {
 
 	public static class LoggingRunnable implements Runnable {
 
-		private BestPathSoFar bpsf;
-		private GAStats gaStats;
+		private final BestPathSoFar bpsf;
+		private final GAStats gaStats;
 
-		public LoggingRunnable(BestPathSoFar bpsf, GAStats gaStats) {
+		public LoggingRunnable(final BestPathSoFar bpsf, final GAStats gaStats) {
 			this.bpsf = bpsf;
 			this.gaStats = gaStats;
 		}
@@ -30,7 +29,7 @@ public class GATest implements Runnable {
 		@Override
 		public void run() {
 			try {
-				Thread.sleep(60000);
+				Thread.sleep(5 * 60000);
 				gaStats.reset();
 
 				while (!Thread.interrupted()) {
@@ -38,32 +37,33 @@ public class GATest implements Runnable {
 					gaStats.print();
 					System.out.println("Current best : " + bpsf.get().length);
 				}
-			} catch (InterruptedException e) {
+			} catch (final InterruptedException e) {
 
 			}
 		}
 	}
 
 	private static final Logger logger = LogManager.getLogger(GATest.class);
-	private WorldMap map;
+	private final WorldMap map;
 	private final int sectionWidth = 50;
 	private final int fixInterval = 5;
 	private final int retries = 1;
-	private int unFixedGenerations = 10;
-	private int maxDupRuns = 200;
-	private double eliteProportion = 0.3;
-	private int populationSize = 125;
-	private double mutationRate = 0.10;
-	private double mutationProportion = 0.15;
+	private final int unFixedGenerations = 10;
+	private final int maxDupRuns = 200;
+	private final double eliteProportion = 0.3;
+	private final int populationSize = 125;
+	private final double mutationRate = 0.10;
+	private final double mutationProportion = 0.15;
 
-	private GAStats gaStats;
-	private int startIdx;
-	private int endIdx;
-	private BestPathSoFar bpsf;
-	private SplittableRandom sr = new SplittableRandom();
+	private final GAStats gaStats;
+	private final int startIdx;
+	private final int endIdx;
+	private final BestPathSoFar bpsf;
+	private final SplittableRandom sr = new SplittableRandom();
 	private boolean overallConvergence;
 
-	public GATest(WorldMap map, BestPathSoFar bpsf2, GAStats gaStats, int startIdx, int endIdx) {
+	public GATest(final WorldMap map, final BestPathSoFar bpsf2, final GAStats gaStats, final int startIdx,
+			final int endIdx) {
 		this.map = map;
 		this.bpsf = bpsf2;
 		this.gaStats = gaStats;
@@ -72,16 +72,16 @@ public class GATest implements Runnable {
 
 	}
 
-	public static void main(String[] args) throws FileNotFoundException, IOException {
+	public static void main(final String[] args) throws FileNotFoundException, IOException {
 
 		final WorldMap map = new MapLoader().load(new File("./data/cities.csv"));
 		final int[] path = new PathLoader().load(new File("./data/out.csv"));
-		double initialLength = map.pathDistanceRoundTripToZero(path);
+		final double initialLength = map.pathDistanceRoundTripToZero(path);
 		System.out.println("Started at : " + initialLength);
-		BestPathSoFar bpsf = new BestPathSoFar(new Path(path, initialLength));
-		GAStats gaStats = new GAStats();
+		final BestPathSoFar bpsf = new BestPathSoFar(new Path(path, initialLength));
+		final GAStats gaStats = new GAStats();
 
-		int width = path.length / 4;
+		final int width = path.length / 4;
 		for (int i = 0; i < 4; ++i)
 			new Thread(new GATest(map, bpsf, gaStats, 1 + (i * width), 1 + width + (i * width))).start();
 
@@ -89,15 +89,16 @@ public class GATest implements Runnable {
 
 	}
 
+	@Override
 	public void run() {
 
-		int[] pathSection = new int[sectionWidth];
+		final int[] pathSection = new int[sectionWidth];
 
 		while (true) {
 
-			Path b = bpsf.get();
-			int[] path = b.steps;
-			int i = sr.nextInt((endIdx - startIdx) - sectionWidth - 1) + startIdx;
+			final Path b = bpsf.get();
+			final int[] path = b.steps;
+			final int i = sr.nextInt((endIdx - startIdx) - sectionWidth - 1) + startIdx;
 
 			runGaAt(map, path, sectionWidth, pathSection, i);
 
@@ -107,17 +108,24 @@ public class GATest implements Runnable {
 
 	}
 
-	private void runGaAt(final WorldMap map, final int[] path, int sectionWidth, int[] pathSection, int pathIndex) {
+	private void runGaAt(final WorldMap map, final int[] path, final int sectionWidth, final int[] pathSection,
+			final int pathIndex) {
 		System.arraycopy(path, pathIndex, pathSection, 0, sectionWidth);
-		GAEnvironment gae = new GAEnvironment(map, path[pathIndex - 1], path[pathIndex + sectionWidth], pathIndex + 1,
-				pathSection);
+		final GAEnvironment gae = new GAEnvironment(map, path[pathIndex - 1], path[pathIndex + sectionWidth],
+				pathIndex + 1, pathSection);
 
 		GAPopulationElement absoluteBest = new GAPopulationElement(gae, pathSection);
-		GA ga = new GA(mutationRate, eliteProportion, populationSize, gae, new BasicSafeCrossover2(),
+		final GA ga = new GA(mutationRate, eliteProportion, populationSize, gae, new BasicSafeCrossover2(),
 				new BasicRandomisationMutation((int) (sectionWidth * mutationProportion)),
-				new BasicRandomisationMutation((int) (sectionWidth * mutationProportion)),
-//				new TotalRandomisationMutation(),				
-				new SwapFixer(gae));
+				new BasicRandomisationMutation((int) (sectionWidth)),
+
+				new SwapFixer(gae),
+				// new ProportionalSelection(populationSize, new
+				// InverseScorer())
+				new EliteSelection(0.5)
+		// new NoSelection()
+
+		);
 
 		overallConvergence = false;
 		for (int t = 0; t < retries; ++t) {
@@ -127,8 +135,8 @@ public class GATest implements Runnable {
 
 	}
 
-	private GAPopulationElement singleGaRun(final int[] path, int sectionWidth, int pathIndex,
-			GAPopulationElement absoluteBest, GA ga) {
+	private GAPopulationElement singleGaRun(final int[] path, final int sectionWidth, final int pathIndex,
+			GAPopulationElement absoluteBest, final GA ga) {
 		int g = 0;
 		ga.setup(null);
 
@@ -142,13 +150,13 @@ public class GATest implements Runnable {
 				canFix = true;
 			}
 
-			boolean f = canFix && g % fixInterval == 0;
+			final boolean f = canFix && g % fixInterval == 0;
 			ga.runOneGeneration(f);
 			if (f) {
 				++fixes;
 			}
 
-			double best = ga.getBestSoFar();
+			final double best = ga.getBestSoFar();
 
 			if (lastBest == best && canFix) {
 				++duplicateRuns;
@@ -163,7 +171,7 @@ public class GATest implements Runnable {
 			++g;
 		}
 
-		double best = ga.getBestSoFar();
+		final double best = ga.getBestSoFar();
 		gaStats.updateStats(best <= absoluteBest.getLength() + 1e-5, g, fixes);
 		overallConvergence |= best <= absoluteBest.getLength() + 1e-5;
 

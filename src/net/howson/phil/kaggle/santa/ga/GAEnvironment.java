@@ -17,7 +17,8 @@ public class GAEnvironment {
 
 	public TIntHashSet permissableNodes;
 
-	public GAEnvironment(WorldMap map, int beforeIdx, int afterIdx, int pathOffset, int[] initialPath) {
+	public GAEnvironment(final WorldMap map, final int beforeIdx, final int afterIdx, final int pathOffset,
+			final int[] initialPath) {
 		super();
 		this.map = map;
 		this.beforeIdx = beforeIdx;
@@ -26,7 +27,7 @@ public class GAEnvironment {
 
 		permissableNodes = new TIntHashSet();
 
-		for (int i : initialPath) {
+		for (final int i : initialPath) {
 			permissableNodes.add(i);
 		}
 	}

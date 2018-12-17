@@ -5,7 +5,7 @@ import org.apache.logging.log4j.Logger;
 
 import net.howson.phil.kaggle.santa.BruteForcePath;
 
-public class BrokenPermFixer implements FixOperator {
+public final class BrokenPermFixer implements FixOperator {
 
 	private static final Logger logger = LogManager.getLogger(BrokenPermFixer.class);
 
@@ -14,7 +14,7 @@ public class BrokenPermFixer implements FixOperator {
 	private final BruteForcePath bfp;
 	private final GAEnvironment env;
 
-	public BrokenPermFixer(int sectionWidth, GAEnvironment env) {
+	public BrokenPermFixer(final int sectionWidth, final GAEnvironment env) {
 		this.pathSection = new int[sectionWidth];
 		this.sectionWidth = sectionWidth;
 		this.env = env;
@@ -38,10 +38,10 @@ public class BrokenPermFixer implements FixOperator {
 	}
 
 	@Override
-	public void fix(GAPopulationElement e) {
+	public void fix(final GAPopulationElement e) {
 
 		double dist = e.getLength();
-		final int n = e.items.length - sectionWidth-1;
+		final int n = e.items.length - sectionWidth - 1;
 		for (int i = 1; i < n; ++i) {
 			dist = tryPermutationsAt(e.items, i, dist);
 		}

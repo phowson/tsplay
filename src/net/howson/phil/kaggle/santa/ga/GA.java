@@ -13,38 +13,39 @@ public final class GA {
 	private final int mutationRateInt;
 	private final GAPopulationElement[] population;
 	private final GAPopulationElement[] newPopulation;
-	private final double[] popScores;
+
 	private final GAEnvironment environment;
 
-	private CrossoverOperator crossoverOperator;
+	private final CrossoverOperator crossoverOperator;
 
-	private MutationOperator mutationOperator;
+	private final MutationOperator mutationOperator;
 
-	private SplittableRandom sr = new SplittableRandom();
+	private final SplittableRandom sr = new SplittableRandom();
 
-	private FixOperator fixOperator;
+	private final FixOperator fixOperator;
 
 	private double totalScore;
-	private int eliteSize;
+	private final int eliteSize;
 
-	private MutationOperator twinMutationOperator;
+	private final MutationOperator twinMutationOperator;
+	private final CrossoverSelection crossoverSelection;
 
-	public GA(double mutationRate, double eliteRatio, int populationSize, GAEnvironment env,
-			CrossoverOperator crossoverOperator, MutationOperator mutationOperator, 
-			
-			MutationOperator twinMutationOperator, 
-			FixOperator fixOperator) {
+	public GA(final double mutationRate, final double eliteRatio, final int populationSize, final GAEnvironment env,
+			final CrossoverOperator crossoverOperator, final MutationOperator mutationOperator,
+
+			final MutationOperator twinMutationOperator, final FixOperator fixOperator,
+			final CrossoverSelection crossoverSelection) {
 
 		this.eliteSize = (int) Math.round(populationSize * eliteRatio);
 		mutationRateInt = (int) Math.round(populationSize * mutationRate);
 		population = new GAPopulationElement[populationSize];
 		newPopulation = new GAPopulationElement[populationSize];
-		popScores = new double[populationSize];
 		this.environment = env;
 		this.crossoverOperator = crossoverOperator;
 		this.mutationOperator = mutationOperator;
 		this.fixOperator = fixOperator;
 		this.twinMutationOperator = twinMutationOperator;
+		this.crossoverSelection = crossoverSelection;
 
 	}
 
@@ -61,8 +62,8 @@ public final class GA {
 		}
 		Arrays.sort(population);
 	}
-	
-	public void applyOneOffFix(FixOperator fixer) {
+
+	public void applyOneOffFix(final FixOperator fixer) {
 		final int l = population.length;
 		for (int i = 0; i < l; ++i) {
 			fixer.fix(population[i]);
@@ -70,13 +71,13 @@ public final class GA {
 		Arrays.sort(population);
 	}
 
-	public void setup(GAPopulationElement seed) {
+	public void setup(final GAPopulationElement seed) {
 
-		TotalRandomisationMutation m = new TotalRandomisationMutation();
+		final TotalRandomisationMutation m = new TotalRandomisationMutation();
 		for (int i = 0; i < population.length; ++i) {
-			int[] a = new int[environment.permissableNodes.size()];
+			final int[] a = new int[environment.permissableNodes.size()];
 			int k = 0;
-			for (int z : environment.permissableNodes.toArray()) {
+			for (final int z : environment.permissableNodes.toArray()) {
 				a[k++] = z;
 			}
 
@@ -91,26 +92,22 @@ public final class GA {
 
 	}
 
-	public void runOneGeneration(boolean fix) {
+	public void runOneGeneration(final boolean fix) {
+
 		final int popSize = population.length;
 
-
-		totalScore = 0;
-		for (int i = 0; i < population.length; ++i) {
-			final double length = population[i].getLength();
-			totalScore += popScores[i] = 1.0 / (length * length);
-		}
+		crossoverSelection.init(population, eliteSize);
 
 		for (int i = eliteSize; i < popSize; ++i) {
-			int a = nextElement();
-			int b = nextElement();
+			final int a = crossoverSelection.nextElement(eliteSize);
+			final int b = crossoverSelection.nextElement(eliteSize);
 			newPopulation[i] = crossoverOperator.crossOver(population[a], population[b]);
 		}
 
 		System.arraycopy(newPopulation, eliteSize, population, eliteSize, popSize - eliteSize);
 
 		for (int i = 0; i < mutationRateInt; ++i) {
-			int a = sr.nextInt(popSize - eliteSize) + eliteSize;
+			final int a = sr.nextInt(popSize - eliteSize) + eliteSize;
 			mutationOperator.mutate(population[a]);
 		}
 
@@ -124,7 +121,7 @@ public final class GA {
 		// Eliminate duplicates from population
 		GAPopulationElement last = population[0];
 		for (int i = 1; i < popSize; ++i) {
-			GAPopulationElement c = population[i];
+			final GAPopulationElement c = population[i];
 			if (last.getLength() == c.getLength()) {
 				twinMutationOperator.mutate(c);
 				hadDups = true;
@@ -139,25 +136,12 @@ public final class GA {
 
 	}
 
-	private int nextElement() {
-		double v = sr.nextDouble(totalScore);
-		int k = 0;
-		final int n = popScores.length;
-		while (k < n - 1) {
-			v -= popScores[k];
-			if (v < 0) {
-				break;
-			}
-			++k;
-		}
-		return k;
-	}
-
+	
 	public GAPopulationElement getBestItem() {
 		return population[0];
 	}
 
-	public void insert(GAPopulationElement orig) {
+	public void insert(final GAPopulationElement orig) {
 		population[population.length - 1] = new GAPopulationElement(environment,
 				Arrays.copyOf(orig.items, orig.items.length));
 

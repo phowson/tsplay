@@ -15,19 +15,19 @@ public class GAStats {
 	public double overallConvergence;
 	public double fixes;
 	public long startTime = System.currentTimeMillis();
-	
-	public synchronized void reset() {
-		convergence=0;
-		runs=0;
-		generations=0;
 
-		overallRuns=0;
-		overallConvergence=0;
+	public synchronized void reset() {
+		convergence = 0;
+		runs = 0;
+		generations = 0;
+
+		overallRuns = 0;
+		overallConvergence = 0;
 		fixes = 0;
 		startTime = System.currentTimeMillis();
 	}
 
-	public synchronized void updateStats(boolean b, int g, int fixes) {
+	public synchronized void updateStats(final boolean b, final int g, final int fixes) {
 		if (b) {
 			++convergence;
 		}
@@ -39,23 +39,23 @@ public class GAStats {
 
 	public synchronized void print() {
 		System.out.println("--------------");
-		double cr = (convergence / runs);
+		final double cr = (convergence / runs);
 		System.out.println("Convergence rate : " + cr);
 		System.out.println("Average generations : " + (generations / runs));
-		System.out.println("Fixes per run : " + (fixes/ runs));
+		System.out.println("Fixes per run : " + (fixes / runs));
 		System.out.println("Overall convergence rate : " + (overallConvergence / overallRuns));
 		System.out.println("Total runs : " + (overallRuns));
-		
-		long tds = System.currentTimeMillis() - startTime;
-		double td = tds / 60000.0; 
-		
-		double rpm = (overallRuns / td);
+
+		final long tds = System.currentTimeMillis() - startTime;
+		final double td = tds / 60000.0;
+
+		final double rpm = (overallRuns / td);
 		System.out.println("Runs per minute : " + rpm);
-		System.out.println("Convergence per minute : " + (cr * rpm) );
-		
+		System.out.println("Convergence per minute : " + (cr * rpm));
+
 	}
 
-	public synchronized void overallStats(boolean b) {
+	public synchronized void overallStats(final boolean b) {
 		overallRuns++;
 		if (b)
 			overallConvergence++;

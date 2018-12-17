@@ -12,10 +12,10 @@ public final class TotalRandomisationMutation implements MutationOperator {
 	private final SplittableRandom r = new SplittableRandom();
 
 	@Override
-	public void mutate(GAPopulationElement e) {
+	public void mutate(final GAPopulationElement e) {
 		final int n = e.items.length;
 		for (int i = 0; i < n - 1; ++i) {
-			int b = r.nextInt(n - i - 1) + i + 1;
+			final int b = r.nextInt(n - i - 1) + i + 1;
 			swap(e.items, i, b);
 		}
 
@@ -23,8 +23,8 @@ public final class TotalRandomisationMutation implements MutationOperator {
 
 	}
 
-	private void swap(int[] items, int a, int b) {
-		int t = items[a];
+	private void swap(final int[] items, final int a, final int b) {
+		final int t = items[a];
 		items[a] = items[b];
 		items[b] = t;
 	}

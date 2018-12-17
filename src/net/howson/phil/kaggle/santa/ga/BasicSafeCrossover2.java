@@ -7,7 +7,7 @@ import org.apache.logging.log4j.Logger;
 
 import gnu.trove.set.hash.TIntHashSet;
 
-public class BasicSafeCrossover2 implements CrossoverOperator {
+public final class BasicSafeCrossover2 implements CrossoverOperator {
 
 	private static final Logger logger = LogManager.getLogger(BasicSafeCrossover2.class);
 
@@ -15,12 +15,12 @@ public class BasicSafeCrossover2 implements CrossoverOperator {
 	private final TIntHashSet workingSet = new TIntHashSet();
 
 	@Override
-	public GAPopulationElement crossOver(GAPopulationElement a, GAPopulationElement b) {
+	public GAPopulationElement crossOver(final GAPopulationElement a, final GAPopulationElement b) {
 		workingSet.clear();
 		final int n = a.items.length;
-		int[] out = new int[n];
-		int crossOverPoint = r.nextInt(a.items.length);
-		int crossOverWidth = r.nextInt(n - crossOverPoint);
+		final int[] out = new int[n];
+		final int crossOverPoint = r.nextInt(a.items.length);
+		final int crossOverWidth = r.nextInt(n - crossOverPoint);
 
 		for (int i = crossOverPoint; i < crossOverPoint + crossOverWidth; ++i) {
 			workingSet.add(out[i] = a.items[i]);

@@ -15,7 +15,7 @@ public class GAPopulationElement implements Comparable<GAPopulationElement> {
 
 	public boolean fixed;
 
-	public GAPopulationElement(GAEnvironment env, int[] items) {
+	public GAPopulationElement(final GAEnvironment env, final int[] items) {
 		super();
 		this.env = env;
 		this.items = items;
@@ -29,7 +29,7 @@ public class GAPopulationElement implements Comparable<GAPopulationElement> {
 	public double getLength() {
 
 		if (length == 0) {
-			WorldMap map = env.map;
+			final WorldMap map = env.map;
 			double d = map.pathDistanceFrom(env.beforeIdx, env.pathOffset, items);
 			d += map.distance(items[items.length - 1], env.afterIdx, items.length + env.pathOffset);
 			length = d;
@@ -38,9 +38,9 @@ public class GAPopulationElement implements Comparable<GAPopulationElement> {
 	}
 
 	@Override
-	public int compareTo(GAPopulationElement o) {
-		double length = this.getLength();
-		double length2 = o.getLength();
+	public int compareTo(final GAPopulationElement o) {
+		final double length = this.getLength();
+		final double length2 = o.getLength();
 		if (length2 > length) {
 			return -1;
 		}

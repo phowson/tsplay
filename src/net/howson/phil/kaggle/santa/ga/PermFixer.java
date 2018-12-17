@@ -14,7 +14,7 @@ public class PermFixer implements FixOperator {
 	private final BruteForcePath bfp;
 	private final GAEnvironment env;
 
-	public PermFixer(int sectionWidth, GAEnvironment env) {
+	public PermFixer(final int sectionWidth, final GAEnvironment env) {
 		this.pathSection = new int[sectionWidth];
 		this.sectionWidth = sectionWidth;
 		this.env = env;
@@ -37,7 +37,7 @@ public class PermFixer implements FixOperator {
 	}
 
 	@Override
-	public void fix(GAPopulationElement e) {
+	public void fix(final GAPopulationElement e) {
 
 		double dist = e.getLength();
 		final int n = e.items.length - sectionWidth - 1;

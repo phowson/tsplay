@@ -8,19 +8,19 @@ import org.apache.logging.log4j.Logger;
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.set.hash.TIntHashSet;
 
-public class BasicSafeCrossover implements CrossoverOperator {
+public final class BasicSafeCrossover implements CrossoverOperator {
 
 	private static final Logger logger = LogManager.getLogger(BasicSafeCrossover.class);
 
 	private final SplittableRandom r = new SplittableRandom();
 
 	@Override
-	public GAPopulationElement crossOver(GAPopulationElement a, GAPopulationElement b) {
-		TIntHashSet workingSet = new TIntHashSet();
+	public GAPopulationElement crossOver(final GAPopulationElement a, final GAPopulationElement b) {
+		final TIntHashSet workingSet = new TIntHashSet();
 
 		final int n = a.items.length;
-		int[] out = new int[n];
-		int crossOverPoint = r.nextInt(a.items.length);
+		final int[] out = new int[n];
+		final int crossOverPoint = r.nextInt(a.items.length);
 
 		for (int i = 0; i < n; ++i) {
 			workingSet.add(a.items[i]);
