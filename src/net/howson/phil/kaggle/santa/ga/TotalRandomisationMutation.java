@@ -5,7 +5,7 @@ import java.util.SplittableRandom;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class TotalRandomisationMutation implements MutationOperator {
+public final class TotalRandomisationMutation implements MutationOperator {
 
 	private static final Logger logger = LogManager.getLogger(TotalRandomisationMutation.class);
 

@@ -6,7 +6,7 @@ import java.util.SplittableRandom;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class GA {
+public final class GA {
 
 	private static final Logger logger = LogManager.getLogger(GA.class);
 
@@ -27,8 +27,13 @@ public class GA {
 	private double totalScore;
 	private int eliteSize;
 
+	private MutationOperator twinMutationOperator;
+
 	public GA(double mutationRate, double eliteRatio, int populationSize, GAEnvironment env,
-			CrossoverOperator crossoverOperator, MutationOperator mutationOperator, FixOperator fixOperator) {
+			CrossoverOperator crossoverOperator, MutationOperator mutationOperator, 
+			
+			MutationOperator twinMutationOperator, 
+			FixOperator fixOperator) {
 
 		this.eliteSize = (int) Math.round(populationSize * eliteRatio);
 		mutationRateInt = (int) Math.round(populationSize * mutationRate);
@@ -39,6 +44,7 @@ public class GA {
 		this.crossoverOperator = crossoverOperator;
 		this.mutationOperator = mutationOperator;
 		this.fixOperator = fixOperator;
+		this.twinMutationOperator = twinMutationOperator;
 
 	}
 
@@ -120,7 +126,7 @@ public class GA {
 		for (int i = 1; i < popSize; ++i) {
 			GAPopulationElement c = population[i];
 			if (last.getLength() == c.getLength()) {
-				mutationOperator.mutate(c);
+				twinMutationOperator.mutate(c);
 				hadDups = true;
 			} else {
 				last = c;

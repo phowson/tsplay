@@ -114,7 +114,10 @@ public class GATest implements Runnable {
 
 		GAPopulationElement absoluteBest = new GAPopulationElement(gae, pathSection);
 		GA ga = new GA(mutationRate, eliteProportion, populationSize, gae, new BasicSafeCrossover2(),
-				new BasicRandomisationMutation((int) (sectionWidth * mutationProportion)), new SwapFixer(gae));
+				new BasicRandomisationMutation((int) (sectionWidth * mutationProportion)),
+				new BasicRandomisationMutation((int) (sectionWidth * mutationProportion)),
+//				new TotalRandomisationMutation(),				
+				new SwapFixer(gae));
 
 		overallConvergence = false;
 		for (int t = 0; t < retries; ++t) {

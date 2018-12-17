@@ -134,6 +134,31 @@ public class PairSwapper {
 		return l;
 	}
 
+	public static final double computeSwapDistance0L(int prevIdx, int afterIdx, final int[] path, final double origLen,
+			int i, int j, final WorldMap map, int pathOffset) {
+
+		double l = origLen;
+
+		int pIMinus1 = prevIdx;
+		int pIPlus1 = path[i + 1];
+		final int pi = path[i];
+		final int pj = path[j];
+		l -= map.distance(pIMinus1, pi, i + 1 + pathOffset);
+		l -= map.distance(pi, pIPlus1, i + 2 + pathOffset);
+
+		int pathJPlus1 = afterIdx;
+		l -= map.distance(path[j - 1], pj, j + 1 + pathOffset) + map.distance(pj, pathJPlus1, j + 2 + pathOffset);
+
+		///////////////////////
+		l += map.distance(pIMinus1, pj, i + 1 + pathOffset);
+		l += map.distance(pj, pIPlus1, i + 2 + pathOffset);
+
+		l += map.distance(path[j - 1], pi, j + 1 + pathOffset);
+		l += map.distance(pi, pathJPlus1, j + 2 + pathOffset);
+
+		return l;
+	}
+
 	public static final double computeSwapDistance0(int prevIdx, final int[] path, final double origLen, int i, int j,
 			final WorldMap map, int pathOffset) {
 
