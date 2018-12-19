@@ -68,11 +68,18 @@ public final class WorldMap {
 		final double o = (cityX[a] - cityX[b]);
 		final double ad = (cityY[a] - cityY[b]);
 		final double d = Math.sqrt((o * o) + (ad * ad));
- 
+
 		if (step % 10 == 0 && !isPrime[a]) {
 			return d * 1.1;
 		}
 
+		return d;
+	}
+
+	public double distanceNoPenalty(int a, int b) {
+		final double o = (cityX[a] - cityX[b]);
+		final double ad = (cityY[a] - cityY[b]);
+		final double d = Math.sqrt((o * o) + (ad * ad));
 		return d;
 	}
 
@@ -86,6 +93,7 @@ public final class WorldMap {
 		return dist;
 
 	}
+
 
 	public double pathDistanceFrom(final int start, final int stepOffset, final int[] path) {
 

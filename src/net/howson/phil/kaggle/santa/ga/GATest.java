@@ -30,16 +30,12 @@ public class GATest implements Runnable {
 		public void run() {
 			try {
 
-				Thread.sleep(1 * 60000);
-				gaStats.reset();
-				Thread.sleep(1 * 60000);
-
-				for (int i = 0; i < 10; ++i) {
+				Thread.sleep(20000);
+				for (int i = 0; i < 60; ++i) {
 					System.out.println("Warming up");
 					gaStats.print();
-					gaStats.reset();
 					System.out.println("Current best : " + bpsf.get().length);
-					Thread.sleep(2 * 60000);
+					Thread.sleep(10000);
 				}
 
 				gaStats.reset();
@@ -66,6 +62,7 @@ public class GATest implements Runnable {
 	private final int populationSize = 125;
 	private final double mutationRate = 0.10;
 	private final double mutationProportion = 0.15;
+	private boolean uniformlySelected = false;
 
 	private final GAStats gaStats;
 	private final int startIdx;
@@ -73,6 +70,7 @@ public class GATest implements Runnable {
 	private final BestPathSoFar bpsf;
 	private final SplittableRandom sr = new SplittableRandom();
 	private boolean overallConvergence;
+	private PathSectionSelector pathSectionSelector;
 
 	public GATest(final WorldMap map, final BestPathSoFar bpsf2, final GAStats gaStats, final int startIdx,
 			final int endIdx) {
@@ -81,6 +79,7 @@ public class GATest implements Runnable {
 		this.gaStats = gaStats;
 		this.startIdx = startIdx;
 		this.endIdx = endIdx;
+		this.pathSectionSelector = new PathSectionSelector(map, sectionWidth, 3000);
 
 	}
 
@@ -94,7 +93,7 @@ public class GATest implements Runnable {
 		final GAStats gaStats = new GAStats();
 
 		final int width = path.length / 4;
-		for (int i = 0; i < 4; ++i)
+		for (int i = 0; i < 5; ++i)
 			new Thread(new GATest(map, bpsf, gaStats, 1 + (i * width), 1 + width + (i * width))).start();
 
 		new Thread(new LoggingRunnable(bpsf, gaStats)).start();
@@ -110,7 +109,18 @@ public class GATest implements Runnable {
 
 			final Path b = bpsf.get();
 			final int[] path = b.steps;
-			final int i = sr.nextInt((endIdx - startIdx) - sectionWidth - 1) + startIdx;
+			int i;
+
+			if (uniformlySelected) {
+				i = sr.nextInt((endIdx - startIdx) - sectionWidth - 1) + startIdx;
+			} else {
+				i = this.pathSectionSelector.selectNextIndex(b);
+				if (i > path.length - sectionWidth - 1) {
+					i = path.length - sectionWidth - 1;
+				} else if (i < 1) {
+					i = 1;
+				}
+			}
 
 			runGaAt(map, path, sectionWidth, pathSection, i);
 
@@ -131,9 +141,8 @@ public class GATest implements Runnable {
 				new BasicRandomisationMutation((int) (sectionWidth * mutationProportion)),
 				new BasicRandomisationMutation((int) (sectionWidth)),
 
-				new SwapFixer(gae),
-				new ProportionalSelection(populationSize, new InverseScorer())
-//				new EliteSelection(0.5, populationSize)
+				new SwapFixer(gae), new ProportionalSelection(populationSize, new InverseScorer())
+		// new EliteSelection(0.5, populationSize)
 		// new NoSelection()
 
 		);
