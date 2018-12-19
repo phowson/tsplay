@@ -62,7 +62,7 @@ public class GATest implements Runnable {
 	private final int populationSize = 125;
 	private final double mutationRate = 0.10;
 	private final double mutationProportion = 0.15;
-	private boolean uniformlySelected = false;
+	private boolean uniformlySelected = true;
 
 	private final GAStats gaStats;
 	private final int startIdx;
@@ -79,7 +79,7 @@ public class GATest implements Runnable {
 		this.gaStats = gaStats;
 		this.startIdx = startIdx;
 		this.endIdx = endIdx;
-		this.pathSectionSelector = new PathSectionSelector(map, sectionWidth, 3000);
+		this.pathSectionSelector = new PathSectionSelector(map, sectionWidth, 2000);
 
 	}
 
@@ -92,8 +92,9 @@ public class GATest implements Runnable {
 		final BestPathSoFar bpsf = new BestPathSoFar(new Path(path, initialLength));
 		final GAStats gaStats = new GAStats();
 
-		final int width = path.length / 4;
-		for (int i = 0; i < 5; ++i)
+		int nThreads = 5;
+		final int width = path.length / nThreads;
+		for (int i = 0; i < nThreads; ++i)
 			new Thread(new GATest(map, bpsf, gaStats, 1 + (i * width), 1 + width + (i * width))).start();
 
 		new Thread(new LoggingRunnable(bpsf, gaStats)).start();
@@ -190,8 +191,11 @@ public class GATest implements Runnable {
 			}
 			++g;
 		}
-
+		
 		final double best = ga.getBestSoFar();
+		
+//		System.out.println("Best : " + absoluteBest.getLength());
+//		System.out.println("Diff : "+ (best - absoluteBest.getLength()));
 		gaStats.updateStats(best <= absoluteBest.getLength() + 1e-5, g, fixes);
 		overallConvergence |= best <= absoluteBest.getLength() + 1e-5;
 
