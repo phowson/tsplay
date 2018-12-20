@@ -20,10 +20,10 @@ public final class GreedySwapFixer implements FixOperator {
 	public void fix(final GAPopulationElement e) {
 
 		double dist = e.getLength();
+		double origdist = dist;
 		final int n = e.items.length;
-		double origdist;
 
-		origdist = dist;
+		
 		for (int i = 0; i < n; ++i) {
 			dist = trySwapsAt(e.items, i, dist);
 		}
