@@ -28,8 +28,10 @@ public final class GreedySwapFixer implements FixOperator {
 			dist = trySwapsAt(e.items, i, dist);
 		}
 
-		e.resetLength();
 		e.fixed = origdist == dist;
+		if (!e.fixed) {
+			e.resetLength();
+		}
 
 	}
 

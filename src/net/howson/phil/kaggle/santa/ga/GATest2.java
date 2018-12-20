@@ -190,26 +190,31 @@ public class GATest2 implements Runnable {
 
 	private void doGa(int index, Path path) {
 		GARunner runner = new GARunner();
+		runner.fixInterval=2;
+		
+		
+		GARunner smallRunner = new GARunner();
+		smallRunner.fixInterval=1;
+		
 		GAFactoryImpl gaf = new GAFactoryImpl();
 		GAFactoryBigImpl gafBig = new GAFactoryBigImpl();
 		int [] pathArray = path.steps;
 		
-		runner.fixInterval=3;
 		runner.run(map, pathArray, index, sectionWidth, gafBig, gaStats100, 5, false);
 		double d = map.pathDistanceRoundTripToZero(path.steps);	
 		System.out.println("After 100 opt, " + d);
 		
-		runner.fixInterval=1;
-		runner.run(map, pathArray, index, 50, gaf, gaStats50, 4, true);
+		
+		smallRunner.run(map, pathArray, index, 50, gaf, gaStats50, 4, true);
 		d = map.pathDistanceRoundTripToZero(path.steps);
 //		System.out.println("After 50 opt 1, " + d);
 		
 		
-		runner.run(map, pathArray, index+50, 50, gaf, gaStats50, 4, true);
+		smallRunner.run(map, pathArray, index+50, 50, gaf, gaStats50, 4, true);
 		d = map.pathDistanceRoundTripToZero(path.steps);
 //		System.out.println("After 50 opt 2, " + d);
 		
-		runner.run(map, pathArray, index+25, 50, gaf, gaStats50, 4, true);
+		smallRunner.run(map, pathArray, index+25, 50, gaf, gaStats50, 4, true);
 		d = map.pathDistanceRoundTripToZero(path.steps);
 		System.out.println("After 50 opt 3, " + d);
 		
