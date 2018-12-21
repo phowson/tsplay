@@ -31,6 +31,7 @@ public class GATest implements Runnable {
 			try {
 
 				Thread.sleep(20000);
+				gaStats.reset();
 				for (int i = 0; i < 60; ++i) {
 					System.out.println("Warming up");
 					gaStats.print();
@@ -54,10 +55,10 @@ public class GATest implements Runnable {
 	private static final Logger logger = LogManager.getLogger(GATest.class);
 	private final WorldMap map;
 	private final int sectionWidth = 50;
-	private final int fixInterval = 5;
+	private final int fixInterval = 1;
 	private final int retries = 1;
 	private final int unFixedGenerations = 10;
-	private final int maxDupRuns = 200;
+	private final int maxDupRuns = 180;
 	private final double eliteProportion = 0.3;
 	private final int populationSize = 125;
 	private final double mutationRate = 0.10;
@@ -125,7 +126,8 @@ public class GATest implements Runnable {
 
 			runGaAt(map, path, sectionWidth, pathSection, i);
 
-			bpsf.update(path, map.pathDistanceRoundTripToZero(path));
+			if (overallConvergence)
+				bpsf.update(path, map.pathDistanceRoundTripToZero(path));
 
 		}
 
@@ -142,7 +144,8 @@ public class GATest implements Runnable {
 				new BasicRandomisationMutation((int) (sectionWidth * mutationProportion)),
 				new BasicRandomisationMutation((int) (sectionWidth)),
 
-				new SwapFixer(gae), new ProportionalSelection(populationSize, new InverseScorer())
+				new GreedySwapFixer(gae), 
+				new ProportionalSelection(populationSize, new InverseScorer())
 		// new EliteSelection(0.5, populationSize)
 		// new NoSelection()
 

@@ -94,7 +94,6 @@ public final class WorldMap {
 
 	}
 
-
 	public double pathDistanceFrom(final int start, final int stepOffset, final int[] path) {
 
 		int currentPosition = start;
@@ -119,6 +118,18 @@ public final class WorldMap {
 	public boolean isPrime(final int i) {
 
 		return isPrime[i];
+	}
+
+	public double getX(int cityId) {
+		return cityX[cityId];
+	}
+
+	public double getY(int cityId) {
+		return cityY[cityId];
+	}
+
+	public void setPrime(int cityId) {
+		isPrime[cityId] = true;
 	}
 
 }
