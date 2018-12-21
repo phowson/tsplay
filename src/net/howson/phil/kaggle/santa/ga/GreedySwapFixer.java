@@ -31,6 +31,10 @@ public final class GreedySwapFixer implements FixOperator {
 		e.fixed = origdist == dist;
 		if (!e.fixed) {
 			e.resetLength();
+//			
+//			if (Math.abs(e.getLength()-dist)>1e-5) {
+//				System.out.println("?");
+//			}
 		}
 
 	}

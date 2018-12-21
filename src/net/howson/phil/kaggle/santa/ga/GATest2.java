@@ -83,6 +83,7 @@ public class GATest2 implements Runnable {
 			return ga;
 		}
 	}
+
 	private class GAFactoryBigImpl implements GAFactory {
 
 		private final double eliteProportion = 0.3;
@@ -94,7 +95,7 @@ public class GATest2 implements Runnable {
 		public GA create(GAEnvironment gae, int sectionWidth) {
 			final GA ga = new GA(mutationRate, eliteProportion, populationSize, gae, new BasicSafeCrossover2(),
 					new BasicRandomisationMutation((int) (sectionWidth * mutationProportion)),
-					new BasicRandomisationMutation((int) (sectionWidth)),
+					new BasicRandomisationMutation((int) (sectionWidth * mutationProportion)),
 
 					new GreedySwapFixer(gae), new ProportionalSelection(populationSize, new InverseScorer())
 			// new EliteSelection(0.5, populationSize)
@@ -104,7 +105,8 @@ public class GATest2 implements Runnable {
 			return ga;
 		}
 	}
-	private boolean uniformlySelected = false;
+
+	private boolean uniformlySelected = true;
 
 	private final GAStats gaStats100;
 	private final GAStats gaStats50;
@@ -153,72 +155,57 @@ public class GATest2 implements Runnable {
 	@Override
 	public void run() {
 
-
 		while (true) {
 
 			final Path inputPath = bpsf.get();
-			
-			Path pathCopy = new Path(Arrays.copyOf(inputPath.steps,inputPath.steps.length), inputPath.length);
-			final int[] path = pathCopy.steps;
+
+			final int[] path = Arrays.copyOf(inputPath.steps, inputPath.steps.length);
 			int i;
-			
+
 			if (uniformlySelected) {
 				i = sr.nextInt((endIdx - startIdx) - sectionWidth - 1) + startIdx;
 			} else {
-				i = this.pathSectionSelector.selectNextIndex(pathCopy);
+				i = this.pathSectionSelector.selectNextIndex(inputPath);
 				if (i > path.length - sectionWidth - 1) {
 					i = path.length - sectionWidth - 1;
 				} else if (i < 1) {
 					i = 1;
 				}
 			}
-			
-			doGa(i, pathCopy);
 
+			doGa(i, path, inputPath.length);
 
-			double d = map.pathDistanceRoundTripToZero(pathCopy.steps);
-			
-			gaStatsOverall.updateStats(d<=pathCopy.length, 1, 1);
-			gaStatsOverall.overallStats(d<=pathCopy.length);
-			if (d < pathCopy.length) {
+			double d = map.pathDistanceRoundTripToZero(path);
 
-				bpsf.update(pathCopy.steps, d);
+			gaStatsOverall.updateStats(d <= inputPath.length, 1, 1);
+			gaStatsOverall.overallStats(d <= inputPath.length);
+			if (d < inputPath.length) {
+				bpsf.update(path, d);
 			}
 		}
 
 	}
 
-	private void doGa(int index, Path path) {
+	private void doGa(int index, int[] pathArray, double origLen) {
 		GARunner runner = new GARunner();
-		runner.fixInterval=2;
-		
-		
+		runner.fixInterval = 1;
+		runner.maxDupRuns = 200;
+
 		GARunner smallRunner = new GARunner();
-		smallRunner.fixInterval=1;
-		
+		smallRunner.fixInterval = 1;
+
 		GAFactoryImpl gaf = new GAFactoryImpl();
 		GAFactoryBigImpl gafBig = new GAFactoryBigImpl();
-		int [] pathArray = path.steps;
-		
+
 		runner.run(map, pathArray, index, sectionWidth, gafBig, gaStats100, 5, false);
-		double d = map.pathDistanceRoundTripToZero(path.steps);	
-		System.out.println("After 100 opt, " + d);
-		
-		
-		smallRunner.run(map, pathArray, index, 50, gaf, gaStats50, 4, true);
-		d = map.pathDistanceRoundTripToZero(path.steps);
-//		System.out.println("After 50 opt 1, " + d);
-		
-		
-		smallRunner.run(map, pathArray, index+50, 50, gaf, gaStats50, 4, true);
-		d = map.pathDistanceRoundTripToZero(path.steps);
-//		System.out.println("After 50 opt 2, " + d);
-		
-		smallRunner.run(map, pathArray, index+25, 50, gaf, gaStats50, 4, true);
-		d = map.pathDistanceRoundTripToZero(path.steps);
+		for (int i = 0; i < 4; ++i) {
+			smallRunner.run(map, pathArray, index, 50, gaf, gaStats50, 1, true);
+			smallRunner.run(map, pathArray, index + 50, 50, gaf, gaStats50, 1, true);
+			smallRunner.run(map, pathArray, index + 25, 50, gaf, gaStats50, 1, true);
+		}
+		double d = map.pathDistanceRoundTripToZero(pathArray);
 		System.out.println("After 50 opt 3, " + d);
-		
-		
+
 	}
 
 }
