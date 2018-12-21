@@ -19,8 +19,8 @@ public final class BasicSafeCrossover2 implements CrossoverOperator {
 		workingSet.clear();
 		final int n = a.items.length;
 		final int[] out = new int[n];
-		final int crossOverPoint = r.nextInt(a.items.length);
-		final int crossOverWidth = r.nextInt(n - crossOverPoint);
+		final int crossOverPoint = r.nextInt(a.items.length-1);
+		final int crossOverWidth = r.nextInt(n - crossOverPoint-1)+1;
 
 		for (int i = crossOverPoint; i < crossOverPoint + crossOverWidth; ++i) {
 			workingSet.add(out[i] = a.items[i]);
