@@ -58,7 +58,10 @@ public class GATest implements Runnable {
 	private final int fixInterval = 1;
 	private final int retries = 1;
 	private final int unFixedGenerations = 10;
-	private final int maxDupRuns = 180;
+	private final int maxDupRuns = 50;
+	private final int canTerminateGenerations = 150;
+	
+	
 	private final double eliteProportion = 0.3;
 	private final int populationSize = 125;
 	private final double mutationRate = 0.10;
@@ -182,14 +185,17 @@ public class GATest implements Runnable {
 
 			final double best = ga.getBestSoFar();
 
-			if (lastBest == best && canFix) {
+			if (lastBest == best && canFix && g>canTerminateGenerations) {
+				
+				
 				++duplicateRuns;
+			
 			} else {
 				duplicateRuns = 0;
 			}
 			lastBest = best;
 
-			if (duplicateRuns == maxDupRuns) {
+			if (g>canTerminateGenerations && duplicateRuns >= maxDupRuns) {
 				break;
 			}
 			++g;
