@@ -75,6 +75,9 @@ public final class WorldMap {
 
 		return d;
 	}
+	
+	
+
 
 	public double distanceNoPenalty(int a, int b) {
 		final double o = (cityX[a] - cityX[b]);
@@ -101,13 +104,36 @@ public final class WorldMap {
 		double dist = 0;
 		while (step < path.length) {
 
-			dist += distance(currentPosition, path[step], step + stepOffset);
+			double d = distance(currentPosition, path[step], step + stepOffset);;
+//			if (Math.abs(d-8.3319)<1e-3) {
+//				System.out.println("?");
+//			}
+			
+			dist += d;
 
 			currentPosition = path[step];
 			step++;
 		}
 
 		return dist;
+
+	}
+
+	public int primeUtilisation(final int[] path) {
+
+		int step = 8;
+		int dist = 0;
+		while (step < path.length) {
+
+			if ((step+2) % 10 == 0 && isPrime[path[step]]) {
+				++dist;
+			}
+
+			step+=10;
+		}
+
+
+		return (int) dist;
 
 	}
 

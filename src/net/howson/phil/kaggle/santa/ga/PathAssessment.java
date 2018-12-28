@@ -2,6 +2,7 @@ package net.howson.phil.kaggle.santa.ga;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeMap;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -106,7 +107,7 @@ public class PathAssessment {
 			out.addAll(f.unusedPrimes);
 		}
 
-		if (ty < TABLE_HEIGHT-1) {
+		if (ty < TABLE_HEIGHT - 1) {
 			f = fastLookupTable[tx][ty + 1];
 			out.addAll(f.unusedPrimes);
 		}
@@ -120,13 +121,13 @@ public class PathAssessment {
 				out.addAll(f.unusedPrimes);
 			}
 
-			if (ty < TABLE_HEIGHT-1) {
+			if (ty < TABLE_HEIGHT - 1) {
 				f = fastLookupTable[tx - 1][ty + 1];
 				out.addAll(f.unusedPrimes);
 			}
 		}
 
-		if (tx < TABLE_WIDTH-1) {
+		if (tx < TABLE_WIDTH - 1) {
 			f = fastLookupTable[tx + 1][ty];
 			out.addAll(f.unusedPrimes);
 
@@ -135,7 +136,7 @@ public class PathAssessment {
 				out.addAll(f.unusedPrimes);
 			}
 
-			if (ty < TABLE_HEIGHT-1) {
+			if (ty < TABLE_HEIGHT - 1) {
 				f = fastLookupTable[tx + 1][ty + 1];
 				out.addAll(f.unusedPrimes);
 			}
@@ -184,6 +185,67 @@ public class PathAssessment {
 				i++;
 			}
 
+		}
+	}
+
+	public TreeMap<Double, PathItem> getClosestNodes(int pathIdx, int minPathDist) {
+
+		TreeMap<Double, PathItem> out = new TreeMap<Double, PathAssessment.PathItem>();
+		int cityIndex = this.path[pathIdx];
+		double x = worldMap.getX(cityIndex);
+		double y = worldMap.getY(cityIndex);
+		int tx = (int) (x * xRatio);
+		int ty = (int) (y * yRatio);
+		MapSector f = fastLookupTable[tx][ty];
+
+		doAdd(out, f.items, pathIdx, minPathDist);
+		if (ty > 0) {
+			f = fastLookupTable[tx][ty - 1];
+			doAdd(out, f.items, pathIdx, minPathDist);
+		}
+
+		if (ty < TABLE_HEIGHT - 1) {
+			f = fastLookupTable[tx][ty + 1];
+			doAdd(out, f.items, pathIdx, minPathDist);
+		}
+
+		if (tx > 0) {
+			f = fastLookupTable[tx - 1][ty];
+			doAdd(out, f.items, pathIdx, minPathDist);
+
+			if (ty > 0) {
+				f = fastLookupTable[tx - 1][ty - 1];
+				doAdd(out, f.items, pathIdx, minPathDist);
+			}
+
+			if (ty < TABLE_HEIGHT - 1) {
+				f = fastLookupTable[tx - 1][ty + 1];
+				doAdd(out, f.items, pathIdx, minPathDist);
+			}
+		}
+
+		if (tx < TABLE_WIDTH - 1) {
+			f = fastLookupTable[tx + 1][ty];
+			doAdd(out, f.items, pathIdx, minPathDist);
+
+			if (ty > 0) {
+				f = fastLookupTable[tx + 1][ty - 1];
+				doAdd(out, f.items, pathIdx, minPathDist);
+			}
+
+			if (ty < TABLE_HEIGHT - 1) {
+				f = fastLookupTable[tx + 1][ty + 1];
+				doAdd(out, f.items, pathIdx, minPathDist);
+			}
+		}
+		return out;
+	}
+
+	private void doAdd(TreeMap<Double, PathItem> out, List<PathItem> items, int pathIdx, int minPathDist) {
+		for (PathItem i : items) {
+			if (Math.abs(i.pathIdx - pathIdx) > minPathDist) {
+				out.put(worldMap.distanceNoPenalty(i.cityId, path[pathIdx]), i);
+			}
 		}
 	}
 
