@@ -36,6 +36,7 @@ public class GATest2 implements Runnable {
 		public void run() {
 			try {
 
+				boolean warmup = true;
 				while (!Thread.interrupted()) {
 					Thread.sleep(120000);
 					System.out.println("***********************************");
@@ -52,6 +53,14 @@ public class GATest2 implements Runnable {
 					gaStats3.print();
 
 					System.out.println("Current best : " + bpsf.get().length);
+
+					if (warmup) {
+						warmup = false;
+						gaStats.reset();
+						gaStats2.reset();
+						gaStats3.reset();
+					}
+
 				}
 			} catch (final InterruptedException e) {
 
@@ -73,7 +82,7 @@ public class GATest2 implements Runnable {
 		public GA create(GAEnvironment gae, int sectionWidth) {
 			final GA ga = new GA(mutationRate, eliteProportion, populationSize, gae, new BasicSafeCrossover2(),
 					new BasicRandomisationMutation((int) (sectionWidth * mutationProportion)),
-					new BasicRandomisationMutation((int) (sectionWidth)),
+					new BasicRandomisationMutation((int) (sectionWidth * mutationProportion)),
 
 					new GreedySwapFixer(gae), new ProportionalSelection(populationSize, new InverseScorer())
 			// new EliteSelection(0.5, populationSize)
@@ -87,7 +96,7 @@ public class GATest2 implements Runnable {
 	private class GAFactoryBigImpl implements GAFactory {
 
 		private final double eliteProportion = 0.3;
-		private final int populationSize = 125;
+		private final int populationSize = 150;
 		private final double mutationRate = 0.10;
 		private final double mutationProportion = 0.15;
 
@@ -142,13 +151,14 @@ public class GATest2 implements Runnable {
 		final GAStats gaStats50 = new GAStats();
 		final GAStats gaStatsOverall = new GAStats();
 
-		int nThreads = 5;
+		int nThreads = 8;
 		final int width = path.length / nThreads;
 		for (int i = 0; i < nThreads; ++i)
 			new Thread(new GATest2(map, bpsf, gaStats100, gaStats50, gaStatsOverall, 1 + (i * width),
 					1 + width + (i * width))).start();
 
 		new Thread(new LoggingRunnable(bpsf, gaStats100, gaStats50, gaStatsOverall)).start();
+		
 
 	}
 
@@ -176,12 +186,13 @@ public class GATest2 implements Runnable {
 			doGa(i, path, inputPath.length);
 
 			double d = map.pathDistanceRoundTripToZero(path);
-
+			System.out.println("GA Converged to " + d);
 			gaStatsOverall.updateStats(d <= inputPath.length, 1, 1);
 			gaStatsOverall.overallStats(d <= inputPath.length);
 			if (d < inputPath.length) {
 				bpsf.update(path, d);
 			}
+
 		}
 
 	}
@@ -189,23 +200,35 @@ public class GATest2 implements Runnable {
 	private void doGa(int index, int[] pathArray, double origLen) {
 		GARunner runner = new GARunner();
 		runner.fixInterval = 1;
-		runner.maxDupRuns = 200;
+		runner.canTerminateAtGen = 480;
+		runner.maxDupRuns = 100;
 
 		GARunner smallRunner = new GARunner();
 		smallRunner.fixInterval = 1;
+		smallRunner.canTerminateAtGen = 100;
+		smallRunner.maxDupRuns = 100;
 
 		GAFactoryImpl gaf = new GAFactoryImpl();
 		GAFactoryBigImpl gafBig = new GAFactoryBigImpl();
+		boolean dontoverwrite = false;
 
-		runner.run(map, pathArray, index, sectionWidth, gafBig, gaStats100, 5, false);
-		for (int i = 0; i < 4; ++i) {
-			smallRunner.run(map, pathArray, index, 50, gaf, gaStats50, 1, true);
-			smallRunner.run(map, pathArray, index + 50, 50, gaf, gaStats50, 1, true);
-			smallRunner.run(map, pathArray, index + 25, 50, gaf, gaStats50, 1, true);
+		for (int j = 0; j < 3; ++j) {
+			runner.run(map, pathArray, index, sectionWidth, gafBig, gaStats100, 1, dontoverwrite);
+			dontoverwrite = true;
+			for (int i = 0; i < 1; ++i) {
+				smallRunner.run(map, pathArray, index, 50, gaf, gaStats50, 1, true);
+				smallRunner.run(map, pathArray, index + 50, 50, gaf, gaStats50, 1, true);
+				smallRunner.run(map, pathArray, index + 25, 50, gaf, gaStats50, 1, true);
+			}
 		}
-		double d = map.pathDistanceRoundTripToZero(pathArray);
-		System.out.println("After 50 opt 3, " + d);
-
+		// runner.run(map, pathArray, index, sectionWidth, gafBig, gaStats100,
+		// 4, dontoverwrite);
+		//
+		// for (int i = 0; i < 3; ++i) {
+		smallRunner.run(map, pathArray, index, 50, gaf, gaStats50, 1, true);
+		smallRunner.run(map, pathArray, index + 50, 50, gaf, gaStats50, 1, true);
+		smallRunner.run(map, pathArray, index + 25, 50, gaf, gaStats50, 1, true);
+		// }
 	}
 
 }

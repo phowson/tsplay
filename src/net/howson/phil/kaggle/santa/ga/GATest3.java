@@ -167,7 +167,7 @@ public class GATest3 implements Runnable {
 //			System.out.println(map.pathDistanceRoundTripToZero(path));
 //			System.exit(-1);
 
-			PathItem closest = pathAssessment.getClosestUnusedPrimes(i.pathIdx, sectionWidth/2);
+			PathItem closest = pathAssessment.getClosestUnusedPrimes(i.pathIdx, 1);
 
 			if (closest==null) {
 				continue;
@@ -178,7 +178,7 @@ public class GATest3 implements Runnable {
 			path[i.pathIdx] = t;
 			
 			double d = map.pathDistanceRoundTripToZero(path);
-			if (d-inputPath.length  > 8) {
+			if (d-inputPath.length  > 5) {
 				continue;
 			}
 			

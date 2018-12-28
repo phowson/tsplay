@@ -58,8 +58,8 @@ public class GATest implements Runnable {
 	private final int fixInterval = 1;
 	private final int retries = 1;
 	private final int unFixedGenerations = 10;
-	private final int maxDupRuns = 50;
-	private final int canTerminateGenerations = 150;
+	private final int maxDupRuns = 100;
+	private final int canTerminateGenerations = 100;
 	
 	
 	private final double eliteProportion = 0.3;
@@ -96,7 +96,7 @@ public class GATest implements Runnable {
 		final BestPathSoFar bpsf = new BestPathSoFar(new Path(path, initialLength));
 		final GAStats gaStats = new GAStats();
 
-		int nThreads = 5;
+		int nThreads = 8;
 		final int width = path.length / nThreads;
 		for (int i = 0; i < nThreads; ++i)
 			new Thread(new GATest(map, bpsf, gaStats, 1 + (i * width), 1 + width + (i * width))).start();
