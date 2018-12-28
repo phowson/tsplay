@@ -8,15 +8,12 @@ import java.util.BitSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.SplittableRandom;
 import java.util.TreeMap;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import gnu.trove.set.hash.TIntHashSet;
 import net.howson.phil.kaggle.santa.BestPathSoFar;
-import net.howson.phil.kaggle.santa.ga.GAStats;
 import net.howson.phil.kaggle.santa.ga.PathAssessment;
 import net.howson.phil.kaggle.santa.ga.PathAssessment.PathItem;
 import net.howson.phil.kaggle.santa.map.MapLoader;
@@ -27,10 +24,10 @@ import net.howson.phil.kaggle.santa.path.PathLoader;
 
 public class NOptPlay implements Runnable {
 
-	private static final int N = 4;
+	private static final int N = 6;
 	private static final Logger logger = LogManager.getLogger(NOptPlay.class);
 	private static final int MINPATHDIST = 3;
-	private static final int MINTOTALPATHDIST = 40;
+	private static final int MINTOTALPATHDIST = 50;
 	private final WorldMap map;
 
 	private final BestPathSoFar bpsf;
@@ -166,10 +163,14 @@ public class NOptPlay implements Runnable {
 		int bestB = -1;
 		int bestC = -1;
 		int bestD = -1;
+		int bestE = -1;
+		int bestF = -1;
 		boolean bestInvert0 = false;
 		boolean bestInvert1 = false;
 		boolean bestInvert2 = false;
 		boolean bestInvert3 = false;
+		boolean bestInvert4 = false;
+		boolean bestInvert5 = false;
 
 		for (int a = 0; a < subpaths.length; ++a) {
 			bitSet.set(a);
@@ -182,32 +183,59 @@ public class NOptPlay implements Runnable {
 
 							for (int d = 0; d < subpaths.length; ++d) {
 								if (!bitSet.get(d)) {
-									for (int x = 0; x < 2; ++x) {
-										for (int y = 0; y < 2; ++y) {
-											for (int z = 0; z < 2; ++z) {
-												for (int q = 0; q < 2; ++q) {
-													invert[0] = x == 0;
-													invert[1] = y == 0;
-													invert[2] = z == 0;
-													invert[3] = q == 0;
+									bitSet.set(d);
 
-													double len = tryPerm(a, b, c, d, inPath, subpaths,
-															lengthWithoutSubPath, invert);
-													if (len < bestLen) {
-														bestLen = len;
-														bestA = a;
-														bestB = b;
-														bestC = c;
-														bestD = d;
-														bestInvert0 = invert[0];
-														bestInvert1 = invert[1];
-														bestInvert2 = invert[2];
-														bestInvert3 = invert[3];
+									for (int e = 0; e < subpaths.length; ++e) {
+										if (!bitSet.get(e)) {
+											bitSet.set(e);
+											for (int f = 0; f < subpaths.length; ++f) {
+												if (!bitSet.get(f)) {
+													bitSet.set(f);
+
+													for (int x = 0; x < 2; ++x) {
+														for (int y = 0; y < 2; ++y) {
+															for (int z = 0; z < 2; ++z) {
+																for (int q = 0; q < 2; ++q) {
+																	for (int r = 0; r < 2; ++r) {
+																		for (int s = 0; s < 2; ++s) {
+																			invert[0] = x == 0;
+																			invert[1] = y == 0;
+																			invert[2] = z == 0;
+																			invert[3] = q == 0;
+																			invert[4] = r == 0;
+																			invert[5] = s == 0;
+
+																			double len = tryPerm(a, b, c, d, e, f,
+																					inPath, subpaths,
+																					lengthWithoutSubPath, invert);
+																			if (len < bestLen) {
+																				bestLen = len;
+																				bestA = a;
+																				bestB = b;
+																				bestC = c;
+																				bestD = d;
+																				bestE = e;
+																				bestF = f;
+																				bestInvert0 = invert[0];
+																				bestInvert1 = invert[1];
+																				bestInvert2 = invert[2];
+																				bestInvert3 = invert[3];
+																				bestInvert4 = invert[4];
+																				bestInvert5 = invert[5];
+																			}
+																		}
+																	}
+																}
+															}
+														}
 													}
+													bitSet.clear(f);													
 												}
 											}
+											bitSet.clear(e);
 										}
 									}
+									bitSet.clear(d);
 								}
 
 							}
@@ -221,6 +249,7 @@ public class NOptPlay implements Runnable {
 		}
 
 		if (bestLen < inPath.length - 1e-5) {
+			System.out.println("I think len is : " + bestLen);
 			int origPathOffset = subpaths[0].pathOffset;
 
 			int[] p = Arrays.copyOf(inPath.steps, inPath.steps.length);
@@ -237,6 +266,12 @@ public class NOptPlay implements Runnable {
 			off += subpaths[bestC].steps.length;
 			subpaths[bestD].copyTo(p, off, bestInvert3);
 
+			off += subpaths[bestD].steps.length;
+			subpaths[bestE].copyTo(p, off, bestInvert4);
+			
+			off += subpaths[bestE].steps.length;
+			subpaths[bestF].copyTo(p, off, bestInvert5);
+
 			double realLength = map.pathDistanceRoundTripToZero(p);
 
 			bpsf.update(p, realLength);
@@ -245,8 +280,8 @@ public class NOptPlay implements Runnable {
 
 	}
 
-	private double tryPerm(int a, int b, int c, int d, Path inPath, SubPath[] subpaths, double lengthWithoutSubPath,
-			boolean[] invert) {
+	private double tryPerm(int a, int b, int c, int d, int e, int f, Path inPath, SubPath[] subpaths,
+			double lengthWithoutSubPath, boolean[] invert) {
 		// if (a == 0 && b == 1 && c == 2 && !invert[0] && !invert[1] &&
 		// !invert[2]) {
 		// return;
@@ -270,8 +305,16 @@ public class NOptPlay implements Runnable {
 				subpaths[d].firstStep(invert[3]), invert[2], false);
 
 		pathOffset += subpaths[c].steps.length;
-		newLength += subpaths[d].distanceAt(pathOffset, subpaths[c].lastStepCityId(invert[2]), origAfterCityId,
-				invert[3], true);
+		newLength += subpaths[d].distanceAt(pathOffset, subpaths[c].lastStepCityId(invert[2]),
+				subpaths[e].firstStep(invert[4]), invert[3], false);
+
+		pathOffset += subpaths[d].steps.length;
+		newLength += subpaths[e].distanceAt(pathOffset, subpaths[d].lastStepCityId(invert[3]),
+				subpaths[f].firstStep(invert[5]), invert[4], false);
+
+		pathOffset += subpaths[e].steps.length;
+		newLength += subpaths[f].distanceAt(pathOffset, subpaths[e].lastStepCityId(invert[4]), origAfterCityId,
+				invert[5], true);
 
 		return newLength;
 
