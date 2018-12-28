@@ -104,12 +104,8 @@ public final class WorldMap {
 		double dist = 0;
 		while (step < path.length) {
 
-			double d = distance(currentPosition, path[step], step + stepOffset);;
-//			if (Math.abs(d-8.3319)<1e-3) {
-//				System.out.println("?");
-//			}
-			
-			dist += d;
+		
+			dist += distance(currentPosition, path[step], step + stepOffset);
 
 			currentPosition = path[step];
 			step++;
