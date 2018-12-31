@@ -3,9 +3,11 @@ package net.howson.phil.kaggle.santa.nopt;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
@@ -53,14 +55,25 @@ public class NOptPlay implements Runnable {
 		System.out.println("Started at : " + initialLength);
 		final BestPathSoFar bpsf = new BestPathSoFar(new Path(path, initialLength));
 
-		int nThreads = 4;
+		int nThreads = 8;
 
 		double perThread = (path.length - 2) / (double) nThreads;
 
-		for (int i = 0; i < nThreads; ++i)
-			new Thread(
-					new NOptPlay(map, bpsf, (int) Math.floor(i * perThread) + 1, (int) Math.floor((i + 1) * perThread)))
-							.start();
+		List<Thread> threads = new ArrayList<Thread>();
+		for (int i = 0; i < nThreads; ++i) {
+			Thread t = new Thread(
+					new NOptPlay(map, bpsf, (int) Math.floor(i * perThread) + 1, (int) Math.floor((i + 1) * perThread)));
+			threads.add(t);
+			t.start();
+		}
+		
+		for (Thread t : threads) {
+			try {
+				t.join();
+			} catch (InterruptedException e) {
+				logger.error("Unexpected exception", e);
+			}
+		}
 
 	}
 
