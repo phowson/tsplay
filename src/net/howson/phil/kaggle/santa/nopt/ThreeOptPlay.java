@@ -24,9 +24,9 @@ import net.howson.phil.kaggle.santa.map.WorldMap;
 import net.howson.phil.kaggle.santa.path.Path;
 import net.howson.phil.kaggle.santa.path.PathLoader;
 
-public class NOptPlay implements Runnable {
+public class ThreeOptPlay implements Runnable {
 
-	private static final int N = 6;
+	private static final int N = 3;
 	private static final Logger logger = LogManager.getLogger(NOptPlay.class);
 	private static final int MINPATHDIST = 3;
 	private static final int MINTOTALPATHDIST = 40;
@@ -38,7 +38,7 @@ public class NOptPlay implements Runnable {
 
 	private PathAssessment pathAssessment;
 
-	public NOptPlay(final WorldMap map, final BestPathSoFar bpsf2, int startIdx, int endIdx) {
+	public ThreeOptPlay(final WorldMap map, final BestPathSoFar bpsf2, int startIdx, int endIdx) {
 		this.map = map;
 		this.bpsf = bpsf2;
 		this.pathAssessment = new PathAssessment(map);
@@ -53,7 +53,7 @@ public class NOptPlay implements Runnable {
 		final int[] path = new PathLoader().load(new File("./data/out.csv"));
 		final double initialLength = map.pathDistanceRoundTripToZero(path);
 		System.out.println("Started at : " + initialLength);
-		final BestPathSoFar bpsf = new BestPathSoFar(new Path(path, initialLength), "6opt.csv");
+		final BestPathSoFar bpsf = new BestPathSoFar(new Path(path, initialLength), "4opt.csv");
 
 		int nThreads = 8;
 
@@ -61,7 +61,7 @@ public class NOptPlay implements Runnable {
 
 		List<Thread> threads = new ArrayList<Thread>();
 		for (int i = 0; i < nThreads; ++i) {
-			Thread t = new Thread(new NOptPlay(map, bpsf, (int) Math.floor(i * perThread) + 1,
+			Thread t = new Thread(new ThreeOptPlay(map, bpsf, (int) Math.floor(i * perThread) + 1,
 					(int) Math.floor((i + 1) * perThread)));
 			threads.add(t);
 			t.start();
@@ -74,7 +74,6 @@ public class NOptPlay implements Runnable {
 				logger.error("Unexpected exception", e);
 			}
 		}
-
 	}
 
 	@Override
@@ -82,14 +81,13 @@ public class NOptPlay implements Runnable {
 
 		System.out.println("Prime utilisation : " + map.primeUtilisation(bpsf.get().steps));
 		// while (true) {
-
 		for (int t = 0; t < 2; ++t) {
 			for (int i = startIdx; i < endIdx; ++i) {
 
 				final Path inputPath = bpsf.get();
 				pathAssessment.updateWithPath(inputPath);
 				if (i % 1000 == 0) {
-					System.out.println(i + ", best = " + inputPath.length);
+					System.out.println(i + ", best = " + inputPath.length + ", time = " + t);
 				}
 				int max = inputPath.steps.length;
 
@@ -129,8 +127,8 @@ public class NOptPlay implements Runnable {
 
 					runPermutations(closestPoints, i, inputPath, t == 0);
 				}
-
 			}
+
 		}
 
 	}
@@ -184,15 +182,9 @@ public class NOptPlay implements Runnable {
 		int bestA = -1;
 		int bestB = -1;
 		int bestC = -1;
-		int bestD = -1;
-		int bestE = -1;
-		int bestF = -1;
 		boolean bestInvert0 = false;
 		boolean bestInvert1 = false;
 		boolean bestInvert2 = false;
-		boolean bestInvert3 = false;
-		boolean bestInvert4 = false;
-		boolean bestInvert5 = false;
 
 		for (int a = 0; a < subpaths.length; ++a) {
 			bitSet.set(a);
@@ -203,75 +195,41 @@ public class NOptPlay implements Runnable {
 						if (!bitSet.get(c)) {
 							bitSet.set(c);
 
-							for (int d = 0; d < subpaths.length; ++d) {
-								if (!bitSet.get(d)) {
-									bitSet.set(d);
+							for (int x = 0; x < 2; ++x) {
+								for (int y = 0; y < 2; ++y) {
+									for (int z = 0; z < 2; ++z) {
+										invert[0] = x == 0;
+										invert[1] = y == 0;
+										invert[2] = z == 0;
 
-									for (int e = 0; e < subpaths.length; ++e) {
-										if (!bitSet.get(e)) {
-											bitSet.set(e);
-											for (int f = 0; f < subpaths.length; ++f) {
-												if (!bitSet.get(f)) {
-													bitSet.set(f);
-
-													for (int x = 0; x < 2; ++x) {
-														for (int y = 0; y < 2; ++y) {
-															for (int z = 0; z < 2; ++z) {
-																for (int q = 0; q < 2; ++q) {
-																	for (int r = 0; r < 2; ++r) {
-																		for (int s = 0; s < 2; ++s) {
-																			invert[0] = x == 0;
-																			invert[1] = y == 0;
-																			invert[2] = z == 0;
-																			invert[3] = q == 0;
-																			invert[4] = r == 0;
-																			invert[5] = s == 0;
-
-																			double len = tryPerm(a, b, c, d, e, f,
-																					inPath, subpaths,
-																					lengthWithoutSubPath, invert);
-																			if (len < bestLen) {
-																				bestLen = len;
-																				bestA = a;
-																				bestB = b;
-																				bestC = c;
-																				bestD = d;
-																				bestE = e;
-																				bestF = f;
-																				bestInvert0 = invert[0];
-																				bestInvert1 = invert[1];
-																				bestInvert2 = invert[2];
-																				bestInvert3 = invert[3];
-																				bestInvert4 = invert[4];
-																				bestInvert5 = invert[5];
-																			}
-																		}
-																	}
-																}
-															}
-														}
-													}
-													bitSet.clear(f);
-												}
-											}
-											bitSet.clear(e);
+										double len = tryPerm(a, b, c, inPath, subpaths, lengthWithoutSubPath, invert);
+										if (len < bestLen) {
+											bestLen = len;
+											bestA = a;
+											bestB = b;
+											bestC = c;
+											bestInvert0 = invert[0];
+											bestInvert1 = invert[1];
+											bestInvert2 = invert[2];
 										}
 									}
-									bitSet.clear(d);
-								}
 
+								}
 							}
+
 							bitSet.clear(c);
 						}
 					}
 					bitSet.clear(b);
 				}
 			}
+
 			bitSet.clear(a);
 		}
 
-		if (bestLen < inPath.length - 1e-5) {
-			System.out.println("I think len is : " + bestLen);
+		if (bestLen < inPath.length - 1e-5)
+
+		{
 			int origPathOffset = subpaths[0].pathOffset;
 
 			int[] p = Arrays.copyOf(inPath.steps, inPath.steps.length);
@@ -285,15 +243,6 @@ public class NOptPlay implements Runnable {
 			off += subpaths[bestB].steps.length;
 			subpaths[bestC].copyTo(p, off, bestInvert2);
 
-			off += subpaths[bestC].steps.length;
-			subpaths[bestD].copyTo(p, off, bestInvert3);
-
-			off += subpaths[bestD].steps.length;
-			subpaths[bestE].copyTo(p, off, bestInvert4);
-
-			off += subpaths[bestE].steps.length;
-			subpaths[bestF].copyTo(p, off, bestInvert5);
-
 			double realLength = map.pathDistanceRoundTripToZero(p);
 
 			bpsf.update(p, realLength);
@@ -302,8 +251,8 @@ public class NOptPlay implements Runnable {
 
 	}
 
-	private double tryPerm(int a, int b, int c, int d, int e, int f, Path inPath, SubPath[] subpaths,
-			double lengthWithoutSubPath, boolean[] invert) {
+	private double tryPerm(int a, int b, int c, Path inPath, SubPath[] subpaths, double lengthWithoutSubPath,
+			boolean[] invert) {
 		// if (a == 0 && b == 1 && c == 2 && !invert[0] && !invert[1] &&
 		// !invert[2]) {
 		// return;
@@ -323,20 +272,8 @@ public class NOptPlay implements Runnable {
 				subpaths[c].firstStep(invert[2]), invert[1], false);
 
 		pathOffset += subpaths[b].steps.length;
-		newLength += subpaths[c].distanceAt(pathOffset, subpaths[b].lastStepCityId(invert[1]),
-				subpaths[d].firstStep(invert[3]), invert[2], false);
-
-		pathOffset += subpaths[c].steps.length;
-		newLength += subpaths[d].distanceAt(pathOffset, subpaths[c].lastStepCityId(invert[2]),
-				subpaths[e].firstStep(invert[4]), invert[3], false);
-
-		pathOffset += subpaths[d].steps.length;
-		newLength += subpaths[e].distanceAt(pathOffset, subpaths[d].lastStepCityId(invert[3]),
-				subpaths[f].firstStep(invert[5]), invert[4], false);
-
-		pathOffset += subpaths[e].steps.length;
-		newLength += subpaths[f].distanceAt(pathOffset, subpaths[e].lastStepCityId(invert[4]), origAfterCityId,
-				invert[5], true);
+		newLength += subpaths[c].distanceAt(pathOffset, subpaths[b].lastStepCityId(invert[1]), origAfterCityId,
+				invert[2], true);
 
 		return newLength;
 

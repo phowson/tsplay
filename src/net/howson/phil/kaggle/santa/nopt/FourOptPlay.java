@@ -3,9 +3,11 @@ package net.howson.phil.kaggle.santa.nopt;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
@@ -51,17 +53,27 @@ public class FourOptPlay implements Runnable {
 		final int[] path = new PathLoader().load(new File("./data/out.csv"));
 		final double initialLength = map.pathDistanceRoundTripToZero(path);
 		System.out.println("Started at : " + initialLength);
-		final BestPathSoFar bpsf = new BestPathSoFar(new Path(path, initialLength));
+		final BestPathSoFar bpsf = new BestPathSoFar(new Path(path, initialLength), "4opt.csv");
 
-		int nThreads = 4;
+		int nThreads = 8;
 
 		double perThread = (path.length - 2) / (double) nThreads;
 
-		for (int i = 0; i < nThreads; ++i)
-			new Thread(
-					new NOptPlay(map, bpsf, (int) Math.floor(i * perThread) + 1, (int) Math.floor((i + 1) * perThread)))
-							.start();
+		List<Thread> threads = new ArrayList<Thread>();
+		for (int i = 0; i < nThreads; ++i) {
+			Thread t = new Thread(new FourOptPlay(map, bpsf, (int) Math.floor(i * perThread) + 1,
+					(int) Math.floor((i + 1) * perThread)));
+			threads.add(t);
+			t.start();
+		}
 
+		for (Thread t : threads) {
+			try {
+				t.join();
+			} catch (InterruptedException e) {
+				logger.error("Unexpected exception", e);
+			}
+		}
 	}
 
 	@Override
@@ -69,51 +81,52 @@ public class FourOptPlay implements Runnable {
 
 		System.out.println("Prime utilisation : " + map.primeUtilisation(bpsf.get().steps));
 		// while (true) {
+		for (int t = 0; t < 2; ++t) {
+			for (int i = startIdx; i < endIdx; ++i) {
 
-		for (int i = startIdx; i < endIdx; ++i) {
+				final Path inputPath = bpsf.get(); 
+				pathAssessment.updateWithPath(inputPath);
+				if (i % 1000 == 0) {
+					System.out.println(i + ", best = " + inputPath.length +", time = " + t);
+				}
+				int max = inputPath.steps.length;
 
-			final Path inputPath = bpsf.get();
-			pathAssessment.updateWithPath(inputPath);
-			if (i % 1000 == 0) {
-				System.out.println(i + ", best = " + inputPath.length);
-			}
-			int max = inputPath.steps.length;
+				TreeMap<Double, PathItem> closest = pathAssessment.getClosestNodes(i, MINPATHDIST);
 
-			TreeMap<Double, PathItem> closest = pathAssessment.getClosestNodes(i, MINPATHDIST);
+				PathItem[] closestPoints = new PathItem[N];
+				int k = 0;
+				for (Iterator<Map.Entry<Double, PathItem>> it = closest.entrySet().iterator(); it.hasNext();) {
+					Entry<Double, PathItem> e = it.next();
+					PathItem v = e.getValue();
 
-			PathItem[] closestPoints = new PathItem[N];
-			int k = 0;
-			for (Iterator<Map.Entry<Double, PathItem>> it = closest.entrySet().iterator(); it.hasNext();) {
-				Entry<Double, PathItem> e = it.next();
-				PathItem v = e.getValue();
+					boolean anyTooClose = false;
 
-				boolean anyTooClose = false;
+					for (int z = 0; z < k; ++z) {
+						if (Math.abs(v.pathIdx - closestPoints[z].pathIdx) < 2) {
+							anyTooClose = true;
+							break;
+						}
+					}
+					if (anyTooClose || v.pathIdx == 0 || v.pathIdx == max) {
+						continue;
+					}
 
-				for (int z = 0; z < k; ++z) {
-					if (Math.abs(v.pathIdx - closestPoints[z].pathIdx) < 2) {
-						anyTooClose = true;
+					if (e.getKey() > 50 && k == 0) {
+						break;
+					}
+
+					// System.out.println(e.getKey());
+					closestPoints[k++] = v;
+					if (k == closestPoints.length) {
 						break;
 					}
 				}
-				if (anyTooClose || v.pathIdx == 0 || v.pathIdx == max) {
-					continue;
-				}
 
-				if (e.getKey() > 50 && k == 0) {
-					break;
-				}
-
-				// System.out.println(e.getKey());
-				closestPoints[k++] = v;
 				if (k == closestPoints.length) {
-					break;
+					// We found enough to continue
+
+					runPermutations(closestPoints, i, inputPath, t==0);
 				}
-			}
-
-			if (k == closestPoints.length) {
-				// We found enough to continue
-
-				runPermutations(closestPoints, i, inputPath);
 			}
 
 		}
@@ -124,7 +137,7 @@ public class FourOptPlay implements Runnable {
 	private final BitSet bitSet = new BitSet();
 	private final SubPath[] subpaths = new SubPath[N];
 
-	private void runPermutations(PathItem[] closestPoints, int idx, Path inPath) {
+	private void runPermutations(PathItem[] closestPoints, int idx, Path inPath, boolean shiftOne) {
 		int[] path = inPath.steps;
 		int[] indexes = new int[N + 1];
 		indexes[0] = idx;
@@ -136,6 +149,14 @@ public class FourOptPlay implements Runnable {
 		if (indexes[indexes.length - 1] - indexes[0] < MINTOTALPATHDIST) {
 			return;
 		}
+		
+		if (shiftOne) {
+//			for (int i = 1; i<indexes.length-1; ++i) {
+//				indexes[i] = indexes[i]+1;
+//			}
+			indexes[1] = indexes[1]+1; 
+		}
+		
 
 		// System.out.println("Path indicies : " + Arrays.toString(indexes));
 		for (int i = 0; i < indexes.length - 1; ++i) {

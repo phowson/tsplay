@@ -67,6 +67,7 @@ public class GATest implements Runnable {
 	private final double mutationRate = 0.10;
 	private final double mutationProportion = 0.15;
 	private boolean uniformlySelected = true;
+	private boolean sequential = true;
 
 	private final GAStats gaStats;
 	private final int startIdx;
@@ -112,25 +113,42 @@ public class GATest implements Runnable {
 
 		while (true) {
 
-			final Path b = bpsf.get();
-			final int[] path = b.steps;
-			int i;
 
-			if (uniformlySelected) {
-				i = sr.nextInt((endIdx - startIdx) - sectionWidth - 1) + startIdx;
-			} else {
-				i = this.pathSectionSelector.selectNextIndex(b);
-				if (i > path.length - sectionWidth - 1) {
-					i = path.length - sectionWidth - 1;
-				} else if (i < 1) {
-					i = 1;
+			
+			if (sequential) {
+				
+
+				for (int i = startIdx; i<endIdx; ++i) {
+					final Path b = bpsf.get();
+					final int[] path = b.steps;
+					runGaAt(map, path, sectionWidth, pathSection, i);
+					if (overallConvergence)
+						bpsf.update(path, map.pathDistanceRoundTripToZero(path));
 				}
+				
+			} else {
+			
+				final Path b = bpsf.get();
+				final int[] path = b.steps;
+				
+				int i;
+				
+				if (uniformlySelected) {
+					i = sr.nextInt((endIdx - startIdx) - sectionWidth - 1) + startIdx;
+				} else {
+					i = this.pathSectionSelector.selectNextIndex(b);
+					if (i > path.length - sectionWidth - 1) {
+						i = path.length - sectionWidth - 1;
+					} else if (i < 1) {
+						i = 1;
+					}
+				}
+
+				runGaAt(map, path, sectionWidth, pathSection, i);
+				if (overallConvergence)
+					bpsf.update(path, map.pathDistanceRoundTripToZero(path));
 			}
 
-			runGaAt(map, path, sectionWidth, pathSection, i);
-
-			if (overallConvergence)
-				bpsf.update(path, map.pathDistanceRoundTripToZero(path));
 
 		}
 

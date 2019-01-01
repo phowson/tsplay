@@ -12,8 +12,8 @@ public class Rerunner {
 	private static final Logger logger = LogManager.getLogger(Rerunner.class);
 	
 	public static void main(String[] args) throws FileNotFoundException, IOException {
-		NOptPlay.main(args);
-		NOptPlay.main(args);
+//		NOptPlay.main(args);
+		FourOptPlay.main(args);
 		GATest.main(args);
 	}
 }
