@@ -28,8 +28,8 @@ public class NOptPlay implements Runnable {
 
 	private static final int N = 6;
 	private static final Logger logger = LogManager.getLogger(NOptPlay.class);
-	private static final int MINPATHDIST = 3;
-	private static final int MINTOTALPATHDIST = 40;
+	private static final int MINPATHDIST = 1;
+	private static final int MINTOTALPATHDIST = 0;
 	private final WorldMap map;
 
 	private final BestPathSoFar bpsf;
@@ -53,7 +53,7 @@ public class NOptPlay implements Runnable {
 		final int[] path = new PathLoader().load(new File("./data/out.csv"));
 		final double initialLength = map.pathDistanceRoundTripToZero(path);
 		System.out.println("Started at : " + initialLength);
-		final BestPathSoFar bpsf = new BestPathSoFar(new Path(path, initialLength), "6opt.csv");
+		final BestPathSoFar bpsf = new BestPathSoFar(new Path(path, initialLength), "6opt.csv", "out.csv");
 
 		int nThreads = 8;
 
@@ -127,7 +127,7 @@ public class NOptPlay implements Runnable {
 				if (k == closestPoints.length) {
 					// We found enough to continue
 
-					runPermutations(closestPoints, i, inputPath, t == 0);
+					runPermutations(closestPoints, i, inputPath, false);
 				}
 
 			}
