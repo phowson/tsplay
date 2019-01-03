@@ -29,8 +29,8 @@ public class NOptPointAndPathPlay implements Runnable {
 	private static final int NEARESTPOINTS = 4;
 	private static final int SUBPATHS = 7;
 	private static final Logger logger = LogManager.getLogger(NOptPointAndPathPlay.class);
-	private static final int MINPATHDIST = 3;
-	private static final int MINTOTALPATHDIST = 40;
+	private static final int MINPATHDIST = 2;
+	private static final int MINTOTALPATHDIST = 0;
 	private final WorldMap map;
 
 	private final BestPathSoFar bpsf;
@@ -53,11 +53,11 @@ public class NOptPointAndPathPlay implements Runnable {
 		final WorldMap map = new MapLoader().load(new File("./data/cities.csv"));
 		//final int[] path = new PathLoader().load(new File("./data/6opt-151987-lastthread 41000.csv"));
 		
-		final int[] path = new PathLoader().load(new File("./data/64optPure-151636.93.csv"));
+		final int[] path = new PathLoader().load(new File("./data/out.csv"));
 		
 		final double initialLength = map.pathDistanceRoundTripToZero(path);
 		System.out.println("Started at : " + initialLength);
-		final BestPathSoFar bpsf = new BestPathSoFar(new Path(path, initialLength), "seg7opt.csv", "out2.csv");
+		final BestPathSoFar bpsf = new BestPathSoFar(new Path(path, initialLength), "seg7opt.csv", "out.csv");
 
 		int nThreads = 8;
 
@@ -87,7 +87,7 @@ public class NOptPointAndPathPlay implements Runnable {
 		System.out.println("Prime utilisation : " + map.primeUtilisation(bpsf.get().steps));
 		// while (true) {
 
-		for (int t = 0; t < 2; ++t) {
+		for (int t = 0; t < 1; ++t) {
 			for (int i = startIdx; i < endIdx; ++i) {
 
 				final Path inputPath = bpsf.get();
@@ -151,6 +151,9 @@ public class NOptPointAndPathPlay implements Runnable {
 			indexes[j] = closestPoints[i].pathIdx;
 			++j;
 			indexes[j] = closestPoints[i].pathIdx + 1;
+			if (indexes[j] >= inPath.steps.length-1) {
+				return;
+			}
 			++j;
 		}
 
