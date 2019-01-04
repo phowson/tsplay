@@ -13,7 +13,9 @@ public class Rerunner {
 	
 	public static void main(String[] args) throws FileNotFoundException, IOException {
 //		NOptPlay.main(args);
-		FourOptPlay.main(args);
+		//FourOptPlay.main(args);
+		
+		NOptPointAndPathPlay.main(args);
 		GATest.main(args);
 	}
 }

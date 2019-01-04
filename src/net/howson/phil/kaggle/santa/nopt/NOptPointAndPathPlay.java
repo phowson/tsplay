@@ -31,6 +31,8 @@ public class NOptPointAndPathPlay implements Runnable {
 	private static final Logger logger = LogManager.getLogger(NOptPointAndPathPlay.class);
 	private static final int MINPATHDIST = 2;
 	private static final int MINTOTALPATHDIST = 0;
+	private static final int MIN_BETWEEN_NODE_DIST = 2;
+	private static final double MAX_DIST = 10000;
 	private final WorldMap map;
 
 	private final BestPathSoFar bpsf;
@@ -108,7 +110,7 @@ public class NOptPointAndPathPlay implements Runnable {
 					boolean anyTooClose = false;
 
 					for (int z = 0; z < k; ++z) {
-						if (Math.abs(v.pathIdx - closestPoints[z].pathIdx) < 2) {
+						if (Math.abs(v.pathIdx - closestPoints[z].pathIdx)  < MIN_BETWEEN_NODE_DIST) {
 							anyTooClose = true;
 							break;
 						}
@@ -117,7 +119,7 @@ public class NOptPointAndPathPlay implements Runnable {
 						continue;
 					}
 
-					if (e.getKey() > 50 && k == 0) {
+					if (e.getKey() > MAX_DIST && k == 0) {
 						break;
 					}
 

@@ -75,7 +75,17 @@ public final class WorldMap {
 
 		return d;
 	}
-	
+	public double distanceSMOD(int a, int b, final int step) {
+		final double o = (cityX[a] - cityX[b]);
+		final double ad = (cityY[a] - cityY[b]);
+		final double d = Math.sqrt((o * o) + (ad * ad));
+
+		if (step==9 && !isPrime[a]) {
+			return d * 1.1;
+		}
+
+		return d;
+	}
 	
 
 
@@ -152,6 +162,10 @@ public final class WorldMap {
 
 	public void setPrime(int cityId) {
 		isPrime[cityId] = true;
+	}
+
+	public boolean penalizedAtMod(int city, int mod) {		
+		return !isPrime[city] && mod == 9;
 	}
 
 }
