@@ -11,8 +11,10 @@ public class GARunner {
 
 	public int unFixedGenerations = 10;
 	public int fixInterval = 5;
+	public int fixInterval2 = 50;
 	public int maxDupRuns = 200;
 	public int canTerminateAtGen = 0;
+	public FixOperator fixoperator2;
 
 	public void run(final WorldMap map, final int[] path, final int pathIndex, final int sectionWidth,
 			GAFactory factory, GAStats gaStats, int retries, boolean bestOnly) {
@@ -45,6 +47,13 @@ public class GARunner {
 				if (f) {
 					++fixes;
 				}
+				
+				if (fixoperator2!=null && canFix && g % fixInterval2 ==0 ) {
+//					System.out.println("Fix2");
+					ga.applyOneOffFix(fixoperator2);
+//					System.out.println("Fix2Done");
+				}
+				
 
 				final double best = ga.getBestSoFar();
 
@@ -56,6 +65,10 @@ public class GARunner {
 				lastBest = best;
 
 				if (duplicateRuns == maxDupRuns) {
+					if (fixoperator2!=null) {
+						ga.applyOneOffFix(fixoperator2);
+					}
+					
 					break;
 				}
 				++g;
@@ -65,8 +78,10 @@ public class GARunner {
 				absoluteBest = ga.getBestItem();
 			}
 			
-			gaStats.updateStats(best <= initialL + 1e-5, g, fixes);
+			gaStats.updateStats(best <= initialL + WorldMap.EPS, g, fixes);
 		}
+		
+		
 		
 		gaStats.overallStats(absoluteBest.getLength() <= initialL);
 

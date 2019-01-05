@@ -20,10 +20,12 @@ public class GATest implements Runnable {
 
 		private final BestPathSoFar bpsf;
 		private final GAStats gaStats;
+		private WorldMap map;
 
-		public LoggingRunnable(final BestPathSoFar bpsf, final GAStats gaStats) {
+		public LoggingRunnable(final BestPathSoFar bpsf, final GAStats gaStats, WorldMap map) {
 			this.bpsf = bpsf;
 			this.gaStats = gaStats;
+			this.map = map;
 		}
 
 		@Override
@@ -35,6 +37,7 @@ public class GATest implements Runnable {
 				for (int i = 0; i < 60; ++i) {
 					System.out.println("Warming up");
 					gaStats.print();
+					System.out.println("Prime utilisation : " + map.primeUtilisation(bpsf.get().steps));
 					System.out.println("Current best : " + bpsf.get().length);
 					Thread.sleep(10000);
 				}
@@ -44,6 +47,7 @@ public class GATest implements Runnable {
 				while (!Thread.interrupted()) {
 					Thread.sleep(10000);
 					gaStats.print();
+					System.out.println("Prime utilisation : " + map.primeUtilisation(bpsf.get().steps));
 					System.out.println("Current best : " + bpsf.get().length);
 				}
 			} catch (final InterruptedException e) {
@@ -97,12 +101,12 @@ public class GATest implements Runnable {
 		final BestPathSoFar bpsf = new BestPathSoFar(new Path(path, initialLength));
 		final GAStats gaStats = new GAStats();
 
-		int nThreads = 8;
+		int nThreads = 7;
 		final int width = path.length / nThreads;
 		for (int i = 0; i < nThreads; ++i)
 			new Thread(new GATest(map, bpsf, gaStats, 1 + (i * width), 1 + width + (i * width))).start();
 
-		new Thread(new LoggingRunnable(bpsf, gaStats)).start();
+		new Thread(new LoggingRunnable(bpsf, gaStats, map)).start();
 
 	}
 
@@ -118,7 +122,7 @@ public class GATest implements Runnable {
 			if (sequential) {
 				
 
-				for (int i = startIdx; i<endIdx; ++i) {
+				for (int i = endIdx-1; i>=startIdx; --i) {
 					final Path b = bpsf.get();
 					final int[] path = b.steps;
 					runGaAt(map, path, sectionWidth, pathSection, i);
@@ -156,6 +160,10 @@ public class GATest implements Runnable {
 
 	private void runGaAt(final WorldMap map, final int[] path, final int sectionWidth, final int[] pathSection,
 			final int pathIndex) {
+		
+		if (pathIndex+ sectionWidth>=path.length-2) {
+			return;
+		}
 		System.arraycopy(path, pathIndex, pathSection, 0, sectionWidth);
 		final GAEnvironment gae = new GAEnvironment(map, path[pathIndex - 1], path[pathIndex + sectionWidth],
 				pathIndex + 1, pathSection);
@@ -223,8 +231,8 @@ public class GATest implements Runnable {
 		
 //		System.out.println("Best : " + absoluteBest.getLength());
 //		System.out.println("Diff : "+ (best - absoluteBest.getLength()));
-		gaStats.updateStats(best <= absoluteBest.getLength() + 1e-5, g, fixes);
-		overallConvergence |= best <= absoluteBest.getLength() + 1e-5;
+		gaStats.updateStats(best <= absoluteBest.getLength() + WorldMap.EPS, g, fixes);
+		overallConvergence |= best <= absoluteBest.getLength() + WorldMap.EPS;
 
 		if (best < absoluteBest.getLength()) {
 			System.out.println("Improved! " + best + " at path position " + pathIndex);

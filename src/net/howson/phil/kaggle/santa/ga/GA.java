@@ -68,6 +68,7 @@ public final class GA {
 			fixer.fix(population[i]);
 		}
 		Arrays.sort(population);
+		removeDups();
 	}
 
 	public void setup(final GAPopulationElement seed) {
@@ -116,6 +117,12 @@ public final class GA {
 			Arrays.sort(population);
 		}
 
+		removeDups();
+
+	}
+
+	private void removeDups() {
+		final int popSize = population.length;
 		boolean hadDups = false;
 		// Eliminate duplicates from population
 		GAPopulationElement last = population[0];
@@ -132,7 +139,6 @@ public final class GA {
 		if (hadDups) {
 			Arrays.sort(population);
 		}
-
 	}
 
 	

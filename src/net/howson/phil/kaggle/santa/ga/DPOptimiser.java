@@ -40,6 +40,16 @@ public class DPOptimiser {
 
 		}
 
+		public void putIntoTour(int pathOffset, int[] items) {
+			System.arraycopy(items, 0, tour_, pathOffset, items.length);
+
+		}
+
+		public void copyTo(int pathOffset, int[] pathArray) {
+			System.arraycopy(tour_, pathOffset, pathArray, 0, pathArray.length);
+
+		}
+
 	};
 
 	// The main DP solver class.
@@ -138,7 +148,7 @@ public class DPOptimiser {
 			}
 
 			best_total = DoSubproblem(false, (1 << K) - 1, -1);
-			return best_total < orig_total - 1e-5;
+			return best_total < orig_total - WorldMap.EPS;
 		}
 
 		// Solve a subproblem.
@@ -213,7 +223,7 @@ public class DPOptimiser {
 				new_total += tsp.distanceSMOD(tour.tour_[idx], tour.tour_[next_idx], idx % 10);
 			}
 
-			if (Math.abs(new_total - best_total) > 1e-5) {
+			if (Math.abs(new_total - best_total) > WorldMap.EPS) {
 				System.err.println("Reconstruction error: " + new_total + " vs " + best_total);
 			}
 
@@ -232,7 +242,7 @@ public class DPOptimiser {
 	private ArrayTour tour;
 
 	public DPOptimiser(int K, int[] path, WorldMap map) {
-		this.dps = new DPSolver(K, false);
+		this.dps = new DPSolver(K, true);
 		this.tour = new ArrayTour(path, map);
 	}
 
@@ -266,6 +276,15 @@ public class DPOptimiser {
 
 	public void copyTo(int[] pathArray) {
 		tour.copyTo(pathArray);
+	}
+
+	public void putIntoTour(int pathOffset, int[] items) {
+		tour.putIntoTour(pathOffset, items);
+	}
+
+	public void copyTo(int pathOffset, int[] items) {
+		tour.copyTo(pathOffset, items);
+
 	}
 
 }

@@ -227,7 +227,7 @@ public class ThreeOptPlay implements Runnable {
 			bitSet.clear(a);
 		}
 
-		if (bestLen < inPath.length - 1e-5)
+		if (bestLen < inPath.length - WorldMap.EPS)
 
 		{
 			int origPathOffset = subpaths[0].pathOffset;

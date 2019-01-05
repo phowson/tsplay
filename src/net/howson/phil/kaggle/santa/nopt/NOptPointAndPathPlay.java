@@ -32,7 +32,7 @@ public class NOptPointAndPathPlay implements Runnable {
 	private static final int MINPATHDIST = 2;
 	private static final int MINTOTALPATHDIST = 0;
 	private static final int MIN_BETWEEN_NODE_DIST = 2;
-	private static final double MAX_DIST = 10000;
+	private static final double MAX_DIST = Double.POSITIVE_INFINITY;
 	private final WorldMap map;
 
 	private final BestPathSoFar bpsf;
@@ -231,7 +231,7 @@ public class NOptPointAndPathPlay implements Runnable {
 																		double len = tryPerm(a, b, c, d, e, f, g,
 																				inPath, subpaths, lengthWithoutSubPath,
 																				invert);
-																		if (len < bestLen - 1e-5) {
+																		if (len < bestLen - WorldMap.EPS) {
 																			bestLen = len;
 																			bestA = a;
 																			bestB = b;
@@ -270,8 +270,9 @@ public class NOptPointAndPathPlay implements Runnable {
 			bitSet.clear(a);
 		}
 
-		if (bestLen < inPath.length - 1e-5) {
+		if (bestLen < inPath.length - WorldMap.EPS) {
 			System.out.println("I think len is : " + bestLen);
+			System.out.println("Inlen is : "  +  inPath.length);
 			int origPathOffset = subpaths[0].pathOffset;
 
 			makeInversionMapping(new int [] {bestA, bestB,bestC,bestD,bestE,bestF, bestG} ,subpaths, new boolean[] { bestInvert0, bestInvert1, bestInvert2 });

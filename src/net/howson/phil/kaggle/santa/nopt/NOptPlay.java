@@ -31,7 +31,7 @@ public class NOptPlay implements Runnable {
 	private static final int MINPATHDIST = 1;
 	private static final int MINTOTALPATHDIST = 0;
 	private static final int MIN_BETWEEN_NODE_DIST = 1;
-	private static final double MAX_DIST = 10000;
+	private static final double MAX_DIST = Double.POSITIVE_INFINITY;
 	private final WorldMap map;
 
 	private final BestPathSoFar bpsf;
@@ -57,7 +57,7 @@ public class NOptPlay implements Runnable {
 		System.out.println("Started at : " + initialLength);
 		final BestPathSoFar bpsf = new BestPathSoFar(new Path(path, initialLength), "6opt.csv", "out.csv");
 
-		int nThreads = 6;
+		int nThreads = 8;
 
 		double perThread = (path.length - 2) / (double) nThreads;
 
@@ -85,7 +85,7 @@ public class NOptPlay implements Runnable {
 		System.out.println("Prime utilisation : " + map.primeUtilisation(bpsf.get().steps));
 		// while (true) {
 
-		for (int t = 0; t < 2; ++t) {
+		for (int t = 0; t < 1; ++t) {
 			for (int i = startIdx; i < endIdx; ++i) {
 
 				final Path inputPath = bpsf.get();
@@ -272,7 +272,7 @@ public class NOptPlay implements Runnable {
 			bitSet.clear(a);
 		}
 
-		if (bestLen < inPath.length - 1e-5) {
+		if (bestLen < inPath.length - WorldMap.EPS) {
 			System.out.println("I think len is : " + bestLen);
 			int origPathOffset = subpaths[0].pathOffset;
 

@@ -104,7 +104,7 @@ public class PathSectionSelector {
 	}
 
 	private double computePenalty(double dist, double distNoP) {
-		if (dist - distNoP > 1e-5) {
+		if (dist - distNoP > WorldMap.EPS) {
 			return //1000+ 
 					(dist - distNoP);	
 		}

@@ -10,6 +10,7 @@ public final class WorldMap {
 	private final double[] cityX;
 	private final double[] cityY;
 	private final boolean[] isPrime;
+	public static final double EPS = 1e-5;
 
 	private int[] idMap;
 
